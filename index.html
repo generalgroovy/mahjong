@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Riichi Mahjong GTO Toolkit</title>
+  <meta name="description" content="Interactive riichi mahjong tile statistics, hand statistics, EV models, and decision trees for near-optimal gameplay." />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --panel-2: #f1f5f9;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --accent: #0f766e;
+      --accent-2: #14b8a6;
+      --danger: #b91c1c;
+      --warn: #b45309;
+      --good: #047857;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+      --radius: 18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg: #020617;
+      --panel: #0f172a;
+      --panel-2: #111827;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --border: #334155;
+      --accent: #2dd4bf;
+      --accent-2: #5eead4;
+      --danger: #f87171;
+      --warn: #fbbf24;
+      --good: #34d399;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.40);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(20,184,166,0.18), transparent 32rem),
+        radial-gradient(circle at top right, rgba(59,130,246,0.14), transparent 28rem),
+        var(--bg);
+      line-height: 1.55;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .shell { max-width: 1220px; margin: 0 auto; padding: 24px; }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 22px;
+      align-items: stretch;
+      padding: 34px 0 18px;
+    }
+    .hero-card, .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.72));
+      background-color: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    [data-theme="dark"] .hero-card, [data-theme="dark"] .card {
+      background: linear-gradient(180deg, rgba(15,23,42,0.92), rgba(15,23,42,0.76));
+    }
+    .hero-card { padding: 32px; }
+    .hero h1 { font-size: clamp(2.25rem, 6vw, 5.2rem); line-height: 0.95; margin: 0 0 18px; letter-spacing: -0.055em; }
+    .hero p { color: var(--muted); font-size: 1.05rem; max-width: 78ch; margin: 0 0 16px; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--muted);
+      background: rgba(148, 163, 184, 0.10);
+      font-size: 0.85rem;
+    }
+    .controls-card { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat {
+      padding: 14px;
+      border-radius: 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+    }
+    .stat b { display: block; font-size: 1.4rem; letter-spacing: -0.035em; }
+    .stat span { color: var(--muted); font-size: 0.78rem; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: color-mix(in srgb, var(--bg) 82%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+    }
+    .brand { font-weight: 800; white-space: nowrap; margin-right: 4px; }
+    .nav a, .button, button, select, input {
+      font: inherit;
+    }
+    .nav a, .button, button {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav a:hover, .button:hover, button:hover { border-color: var(--accent); text-decoration: none; }
+    .button.primary, button.primary { background: var(--accent); color: #042f2e; border-color: var(--accent); font-weight: 700; }
+    [data-theme="dark"] .button.primary, [data-theme="dark"] button.primary { color: #032b27; }
+
+    section { padding: 24px 0; }
+    .section-head { display: flex; gap: 16px; justify-content: space-between; align-items: end; margin-bottom: 14px; }
+    .section-head h2 { font-size: clamp(1.55rem, 3vw, 2.35rem); margin: 0; letter-spacing: -0.04em; }
+    .section-head p { margin: 6px 0 0; color: var(--muted); max-width: 80ch; }
+    .card { padding: 20px; margin-bottom: 16px; }
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .table-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    input, select {
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 9px 11px;
+      min-width: 180px;
+    }
+    input[type="range"] { min-width: 140px; padding: 0; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; background: var(--panel); }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { cursor: pointer; user-select: none; font-size: 0.85rem; color: var(--muted); background: var(--panel-2); position: sticky; top: 0; }
+    tr:last-child td { border-bottom: 0; }
+    td.num { font-variant-numeric: tabular-nums; text-align: right; }
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: rgba(20,184,166,0.13);
+      border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--border));
+      color: var(--accent);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tab { border-radius: 12px; }
+    .tab.active { background: var(--accent); color: #042f2e; border-color: var(--accent); font-weight: 800; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    details {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 10px 0;
+    }
+    summary { cursor: pointer; font-weight: 800; }
+    details p, details li { color: var(--muted); }
+    pre {
+      white-space: pre-wrap;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 14px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.88rem;
+    }
+    code { font-family: var(--mono); }
+
+    .calc-grid { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 12px; align-items: end; }
+    .field label { display: block; color: var(--muted); font-size: 0.82rem; margin-bottom: 6px; }
+    .result-box {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      min-height: 86px;
+    }
+    .result-box .big { font-size: clamp(1.7rem, 3vw, 2.6rem); font-weight: 900; letter-spacing: -0.05em; display: block; }
+    .result-box .muted { color: var(--muted); }
+    .bars { display: grid; gap: 8px; margin-top: 14px; }
+    .bar-row { display: grid; grid-template-columns: 80px minmax(0, 1fr) 70px; gap: 8px; align-items: center; font-size: 0.9rem; }
+    .bar-track { height: 10px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border); overflow: hidden; }
+    .bar { height: 100%; width: 0%; background: var(--accent); border-radius: 999px; }
+
+    .tree-node {
+      border-left: 2px solid var(--border);
+      padding-left: 14px;
+      margin: 8px 0 8px 8px;
+    }
+    .tree-node strong { color: var(--text); }
+    .tree-node span { color: var(--muted); }
+    .callout {
+      border-left: 4px solid var(--accent);
+      padding: 12px 14px;
+      background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+      border-radius: 12px;
+      color: var(--muted);
+    }
+    .formula {
+      font-family: var(--mono);
+      padding: 12px 14px;
+      background: var(--panel-2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .footer { color: var(--muted); font-size: 0.92rem; padding: 30px 0 48px; }
+    .print-only { display: none; }
+
+    @media (max-width: 880px) {
+      .hero, .grid.two, .grid.three, .calc-grid { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .shell { padding: 18px; }
+      .nav { padding: 10px 18px; }
+      .hero-card { padding: 24px; }
+    }
+
+    @media print {
+      .topbar, .no-print, button, input, select { display: none !important; }
+      body { background: white; color: black; }
+      .card, .hero-card { box-shadow: none; border: 1px solid #999; }
+      .tab-panel { display: block !important; }
+      .print-only { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar no-print">
+    <nav class="nav" aria-label="Site navigation">
+      <span class="brand">Riichi GTO Toolkit</span>
+      <a href="#statistics">Stats</a>
+      <a href="#calculators">Calculators</a>
+      <a href="#trees">Decision Trees</a>
+      <a href="#policy">Policy</a>
+      <a href="#solver">Solver</a>
+      <a href="#sources">Sources</a>
+      <button id="themeToggle" type="button">Toggle theme</button>
+      <button id="printBtn" type="button">Print / PDF</button>
+    </nav>
+  </div>
+
+  <main class="shell">
+    <header class="hero">
+      <div class="hero-card">
+        <h1>Riichi Mahjong Near-GTO Toolkit</h1>
+        <p>Interactive tile statistics, hand statistics, probability calculators, EV models, and decision trees for rigorous Japanese riichi mahjong decisions.</p>
+        <p><strong>Scope:</strong> Japanese riichi mahjong, WRC-style assumptions. Exact GTO mahjong is not solved; this site models near-optimal gameplay with shanten, ukeire, EV, opponent threat estimation, and rank utility.</p>
+        <div class="badge-row" aria-label="Key assumptions">
+          <span class="badge">136 tiles</span>
+          <span class="badge">34 tile types</span>
+          <span class="badge">4 players</span>
+          <span class="badge">Hidden information</span>
+          <span class="badge">Rank-adjusted EV</span>
+        </div>
+      </div>
+      <aside class="controls-card card">
+        <h2 style="margin:0; letter-spacing:-0.035em;">Fast facts</h2>
+        <div class="stat-grid">
+          <div class="stat"><b>87.13%</b><span>starting hands with at least one pair-or-better</span></div>
+          <div class="stat"><b>8.77%</b><span>starting hands with at least one triplet-or-better</span></div>
+          <div class="stat"><b>33.41%</b><span>chance to start with at least one exact dora type</span></div>
+          <div class="stat"><b>17.87%</b><span>chance to start with 7+ terminals/honors</span></div>
+        </div>
+        <div class="callout">Use the tabs and calculators below to convert static strategy into action-level decisions.</div>
+      </aside>
+    </header>
+
+    <section id="statistics">
+      <div class="section-head">
+        <div>
+          <h2>Statistics tables</h2>
+          <p>Sortable, searchable tables for tiles, starting hands, waits, and scoring. Click headers to sort.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tabs" role="tablist" aria-label="Statistics tables">
+          <button class="tab active" data-tab="tiles">Tile classes</button>
+          <button class="tab" data-tab="start">Starting hand</button>
+          <button class="tab" data-tab="honors">Terminals/honors</button>
+          <button class="tab" data-tab="waits">Wait quality</button>
+          <button class="tab" data-tab="scoring">Scoring</button>
+        </div>
+        <div class="table-tools">
+          <input id="tableSearch" type="search" placeholder="Filter active table..." aria-label="Filter active table" />
+          <button type="button" id="resetSearch">Clear</button>
+        </div>
+        <div id="tiles" class="tab-panel active"></div>
+        <div id="start" class="tab-panel"></div>
+        <div id="honors" class="tab-panel"></div>
+        <div id="waits" class="tab-panel"></div>
+        <div id="scoring" class="tab-panel"></div>
+      </div>
+    </section>
+
+    <section id="calculators">
+      <div class="section-head">
+        <div>
+          <h2>Calculators</h2>
+          <p>Quantify draw probability, discard EV, riichi EV, and push/fold thresholds. These are simplified models, not a full game solver.</p>
+        </div>
+      </div>
+
+      <div class="grid two">
+        <article class="card">
+          <h3>Ukeire draw probability</h3>
+          <p class="muted">Probability of drawing at least one live out in a given number of own draws.</p>
+          <div class="calc-grid">
+            <div class="field"><label for="liveTiles">Unknown live tiles</label><input id="liveTiles" type="number" min="1" max="120" value="70" /></div>
+            <div class="field"><label for="outs">Live outs</label><input id="outs" type="number" min="0" max="70" value="8" /></div>
+            <div class="field"><label for="draws">Own draws left</label><input id="draws" type="number" min="0" max="25" value="8" /></div>
+            <div><button class="primary" id="calcUkeire" type="button">Calculate</button></div>
+          </div>
+          <div class="result-box" style="margin-top:14px;">
+            <span class="big" id="ukeireResult">64.2%</span>
+            <span class="muted" id="ukeireNote">8 live outs among 70 unknown live tiles over 8 draws.</span>
+          </div>
+          <div class="bars" id="ukeireBars"></div>
+        </article>
+
+        <article class="card">
+          <h3>Action EV estimator</h3>
+          <p class="muted">Compute a simplified point EV for one action: win EV + draw EV − deal-in EV − passive loss − costs + rank adjustment.</p>
+          <div class="calc-grid">
+            <div class="field"><label for="pWin">P(win) %</label><input id="pWin" type="number" min="0" max="100" step="0.1" value="18" /></div>
+            <div class="field"><label for="winValue">Win value</label><input id="winValue" type="number" value="3900" /></div>
+            <div class="field"><label for="pTenpai">P(draw tenpai) %</label><input id="pTenpai" type="number" min="0" max="100" step="0.1" value="22" /></div>
+            <div class="field"><label for="tenpaiValue">Draw value</label><input id="tenpaiValue" type="number" value="1500" /></div>
+            <div class="field"><label for="pDeal">P(deal-in) %</label><input id="pDeal" type="number" min="0" max="100" step="0.1" value="9" /></div>
+            <div class="field"><label for="dealLoss">Deal-in loss</label><input id="dealLoss" type="number" value="5200" /></div>
+            <div class="field"><label for="pOther">P(other win) %</label><input id="pOther" type="number" min="0" max="100" step="0.1" value="20" /></div>
+            <div class="field"><label for="otherLoss">Passive loss</label><input id="otherLoss" type="number" value="1000" /></div>
+            <div class="field"><label for="cost">Action cost</label><input id="cost" type="number" value="1000" /></div>
+            <div class="field"><label for="rankAdjust">Rank adjustment</label><input id="rankAdjust" type="number" value="0" /></div>
+            <div><button class="primary" id="calcEv" type="button">Estimate EV</button></div>
+          </div>
+          <div class="result-box" style="margin-top:14px;">
+            <span class="big" id="evResult">+364</span>
+            <span class="muted" id="evNote">Positive EV suggests the action is viable under this simplified model.</span>
+          </div>
+        </article>
+      </div>
+
+      <div class="grid two">
+        <article class="card">
+          <h3>Riichi vs dama quick compare</h3>
+          <div class="calc-grid">
+            <div class="field"><label for="damaWin">Dama P(win) %</label><input id="damaWin" type="number" min="0" max="100" value="16" /></div>
+            <div class="field"><label for="damaValue">Dama win value</label><input id="damaValue" type="number" value="3900" /></div>
+            <div class="field"><label for="riichiWin">Riichi P(win) %</label><input id="riichiWin" type="number" min="0" max="100" value="14" /></div>
+            <div class="field"><label for="riichiValue">Riichi win value</label><input id="riichiValue" type="number" value="7700" /></div>
+            <div class="field"><label for="riichiDeal">Extra deal-in risk %</label><input id="riichiDeal" type="number" min="0" max="100" value="3" /></div>
+            <div class="field"><label for="riichiLoss">Expected deal-in loss</label><input id="riichiLoss" type="number" value="5200" /></div>
+            <div><button class="primary" id="calcRiichi" type="button">Compare</button></div>
+          </div>
+          <div class="result-box" style="margin-top:14px;">
+            <span class="big" id="riichiResult">Riichi +300</span>
+            <span class="muted" id="riichiNote">Riichi value premium minus deposit and added danger.</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Push/fold threshold</h3>
+          <p class="muted">Rule-of-thumb classifier using shanten, value, wait quality, dealer status, and threat level.</p>
+          <div class="calc-grid">
+            <div class="field"><label for="myShanten">Your state</label><select id="myShanten"><option value="3">3+ shanten</option><option value="2">2 shanten</option><option value="1">1 shanten</option><option value="0" selected>Tenpai</option></select></div>
+            <div class="field"><label for="myValue">Hand value</label><select id="myValue"><option value="cheap">Cheap</option><option value="mid" selected>3900+</option><option value="mangan">Mangan+</option></select></div>
+            <div class="field"><label for="waitQuality">Wait</label><select id="waitQuality"><option value="bad">Bad</option><option value="good" selected>Good</option></select></div>
+            <div class="field"><label for="threatLevel">Threat</label><select id="threatLevel"><option value="low">Low</option><option value="riichi" selected>Opponent riichi</option><option value="dealer">Dealer/high value</option></select></div>
+            <div><button class="primary" id="calcPushFold" type="button">Classify</button></div>
+          </div>
+          <div class="result-box" style="margin-top:14px;">
+            <span class="big" id="pushFoldResult">Push</span>
+            <span class="muted" id="pushFoldNote">Tenpai with good wait and 3900+ value is often worth pushing against one riichi.</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="trees">
+      <div class="section-head">
+        <div>
+          <h2>Decision trees</h2>
+          <p>Expandable game-theory trees for discard, riichi, call, push/fold, and kan decisions.</p>
+        </div>
+      </div>
+      <div class="card">
+        <details open>
+          <summary>Information-set tree</summary>
+          <div class="tree-node"><strong>Information set I<sub>t</sub></strong> <span>observed public state + your private hand + beliefs over hidden tiles.</span>
+            <div class="tree-node"><strong>Public state</strong> <span>discards, calls, dora indicators, riichi declarations, honba, sticks, scores, dealer, round.</span></div>
+            <div class="tree-node"><strong>Private state</strong> <span>your tiles, shanten, ukeire, yaku routes, value distribution, safe tiles.</span></div>
+            <div class="tree-node"><strong>Belief state</strong> <span>opponent hand ranges, wall composition, dead-wall unknowns, tenpai probability, wait/value distributions.</span></div>
+            <div class="tree-node"><strong>Legal actions</strong> <span>win, riichi, discard, chi, pon, kan, pass, fold line.</span></div>
+          </div>
+        </details>
+
+        <details>
+          <summary>Discard tree</summary>
+          <pre>DISCARD NODE
+1. Can you legally win?
+   ├─ Yes: win unless placement demands refusal.
+   └─ No: continue.
+2. Is any opponent in high-threat state?
+   ├─ Yes: enter push/fold tree.
+   └─ No: continue offense tree.
+3. For each discard candidate:
+   ├─ Resulting shanten
+   ├─ Live ukeire
+   ├─ Wait quality
+   ├─ Yaku and dora retention
+   ├─ Expected hand value
+   ├─ Immediate discard safety
+   ├─ Future draw safety
+   └─ Callability / openness cost
+4. Select max: offensive EV + rank EV − deal-in risk − flexibility loss.</pre>
+        </details>
+
+        <details>
+          <summary>Riichi tree</summary>
+          <pre>RIICHI NODE
+Closed tenpai?
+├─ No: cannot riichi.
+└─ Yes:
+   ├─ Dama hand already high value?
+   │  ├─ Yes: compare dama EV vs riichi EV.
+   │  └─ No: riichi value premium rises.
+   ├─ Wait quality?
+   │  ├─ Ryanmen / multi-sided: riichi usually favored.
+   │  ├─ Bad wait + high value: mixed.
+   │  └─ Bad wait + cheap + dangerous: dama/fold often better.
+   ├─ Opponent state?
+   │  ├─ No threat: riichi pressure valuable.
+   │  ├─ One threat: require good wait/value.
+   │  └─ Multiple threats: riichi only with strong need.
+   └─ Rank context?
+      ├─ Need points: riichi more attractive.
+      ├─ Leading all-last: dama/fold more attractive.
+      └─ Dealer/honba/sticks: riichi EV rises.</pre>
+        </details>
+
+        <details>
+          <summary>Call tree</summary>
+          <pre>CALL NODE
+Opponent discards callable tile.
+├─ Does call complete winning hand?
+│  └─ Ron if legal and rank-correct.
+├─ Does call reduce shanten?
+│  ├─ No: usually pass.
+│  └─ Yes: continue.
+├─ Is there a valid yaku route after call?
+│  ├─ No: usually pass.
+│  └─ Yes: continue.
+├─ Value after call?
+│  ├─ 1000–2000: call only for speed/rank/dealer need.
+│  ├─ 3900+: call often viable.
+│  └─ Mangan+: call strongly if speed improves.
+└─ Defense cost?
+   ├─ High: pass.
+   └─ Low: call if EV-positive.</pre>
+        </details>
+
+        <details>
+          <summary>Push/fold tree</summary>
+          <pre>PUSH/FOLD NODE
+Opponent threat detected.
+├─ Are you tenpai?
+│  ├─ No:
+│  │  ├─ 2+ shanten: fold unless very high value/rank-forced.
+│  │  └─ 1 shanten: push only with value + ukeire + safe path.
+│  └─ Yes:
+│     ├─ Good wait + good value: push more.
+│     ├─ Bad wait + cheap hand: fold/dama more.
+│     └─ Dealer/all-last need: rank-adjust.
+└─ Discard safety order:
+   1. Genbutsu against all threats
+   2. Completely safe honor/no-chance tiles
+   3. Genbutsu against most dangerous opponent
+   4. Suji terminals
+   5. Suji 2/8
+   6. Suji 3/7
+   7. One-chance / kabe-informed tiles
+   8. Raw middle tiles 4/5/6 last</pre>
+        </details>
+
+        <details>
+          <summary>Kan tree</summary>
+          <pre>KAN NODE
+Can declare kan?
+├─ No: continue.
+└─ Yes:
+   ├─ Opponents in riichi / high threat?
+   │  ├─ Yes: avoid unless win/EV/rank strongly requires.
+   │  └─ No: continue.
+   ├─ Does kan improve your hand?
+   │  ├─ Replacement draw / extra dora / preserves tenpai: consider.
+   │  ├─ Breaks shape or safety: avoid.
+   │  └─ Adds value to strong dealer/tenpai hand: consider.
+   └─ After riichi?
+      └─ Only under strict concealed-kan restrictions.</pre>
+        </details>
+      </div>
+    </section>
+
+    <section id="policy">
+      <div class="section-head">
+        <div>
+          <h2>Near-GTO policy matrix</h2>
+          <p>Action-level heuristics organized by phase, threat, and hand state.</p>
+        </div>
+      </div>
+      <div class="grid three">
+        <div class="card">
+          <h3>Early game</h3>
+          <ul>
+            <li>Choose lowest shanten, then highest live ukeire.</li>
+            <li>Keep dora and yaku if the efficiency cost is small.</li>
+            <li>Prefer flexible middle tiles over isolated terminals.</li>
+            <li>Do not open without a valid yaku route.</li>
+            <li>Keep a safe tile when the hand is slow.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Midgame</h3>
+          <ul>
+            <li>Fast cheap hands are valid when stopping dealer or improving placement.</li>
+            <li>Slow cheap hands should convert to defense.</li>
+            <li>Strong 1-shanten hands can push through moderate threat.</li>
+            <li>Visible open mangan threats should be treated as riichi-equivalent.</li>
+            <li>Dealer pressure increases folding threshold.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Endgame</h3>
+          <ul>
+            <li>Tenpai near exhaustive draw can justify safe pushes.</li>
+            <li>Noten + unsafe tiles usually folds.</li>
+            <li>All-last leader maximizes placement, not raw points.</li>
+            <li>Exact point requirements determine dama/riichi/yaku choices.</li>
+            <li>Dealer continuation value can justify extra risk.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Push/fold matrix</h3>
+        <div id="pushFoldTable"></div>
+      </div>
+    </section>
+
+    <section id="solver">
+      <div class="section-head">
+        <div>
+          <h2>Solver architecture</h2>
+          <p>A static site cannot run full self-play RL, but this architecture shows how to extend the model into a real engine.</p>
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>Core action scorer</h3>
+          <div class="formula">EV(a|s) = P<sub>w</sub>V<sub>w</sub> + P<sub>t</sub>V<sub>t</sub> − P<sub>d</sub>L<sub>d</sub> − P<sub>o</sub>L<sub>o</sub> − C(a) + R<sub>rank</sub></div>
+          <ol>
+            <li>Enumerate legal actions.</li>
+            <li>Compute resulting shanten and live ukeire.</li>
+            <li>Estimate hand-value distribution.</li>
+            <li>Estimate opponent tenpai/value/wait distributions.</li>
+            <li>Estimate deal-in risk by discard.</li>
+            <li>Apply rank utility.</li>
+            <li>Choose max-EV action.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Implementation notes</h3>
+          <ul>
+            <li><strong>Frontend-only:</strong> this GitHub Pages version is static HTML/CSS/JS.</li>
+            <li><strong>Data layer:</strong> tables are stored as JavaScript arrays for easy extension.</li>
+            <li><strong>Model upgrade path:</strong> add a shanten library, tile parser, wall-state estimator, and trained action models.</li>
+            <li><strong>Rank utility:</strong> replace raw point EV with tournament placement EV near all-last.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="section-head">
+        <div>
+          <h2>Sources and further reading</h2>
+          <p>Primary rules and technical references used to structure the framework.</p>
+        </div>
+      </div>
+      <div class="card">
+        <ul>
+          <li><a href="https://static1.squarespace.com/static/634a7884c297a25f06589b79/t/636136c78306ca6579c03fd0/1667315409318/WRC_Rules_2022_20220708_site.pdf" target="_blank" rel="noopener">World Riichi Championship Rules 2022</a> — tile set, hand validity, riichi, furiten, scoring, honba, hanchan scoring.</li>
+          <li><a href="https://arxiv.org/abs/2003.13590" target="_blank" rel="noopener">Suphx: Mastering Mahjong with Deep Reinforcement Learning</a> — modern AI treatment of mahjong as a multiplayer imperfect-information game.</li>
+          <li><a href="https://arxiv.org/abs/2108.06832" target="_blank" rel="noopener">A Fast Algorithm for Computing the Deficiency Number of a Mahjong Hand</a> — formal treatment of deficiency/shanten computation.</li>
+          <li><a href="https://blog.ezyang.com/2014/04/calculating-shanten-in-mahjong/" target="_blank" rel="noopener">Calculating Shanten in Mahjong</a> — practical shanten/ukeire computation discussion.</li>
+          <li><a href="https://riichi.wiki/Shanten" target="_blank" rel="noopener">Riichi Wiki: Shanten</a> — strategy definition and examples.</li>
+          <li><a href="https://riichi.wiki/Suji" target="_blank" rel="noopener">Riichi Wiki: Suji</a> — defensive heuristic explanation and limitations.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p><strong>Deployment:</strong> upload this folder to a GitHub repository, enable GitHub Pages from the repository settings, and serve from the root branch. No build step required.</p>
+      <p>Generated as a static educational toolkit. It is not a solved mahjong engine and should not be interpreted as a proof of equilibrium play.</p>
+    </footer>
+  </main>
+
+  <script>
+    const DATA = {
+      tiles: {
+        columns: ["Class", "Tile types", "Copies", "Share", "Strategic use"],
+        rows: [
+          ["Suited simples, 2–8", 21, 84, "61.76%", "Efficient sequences, tanyao, pinfu"],
+          ["Terminals, 1/9", 6, 24, "17.65%", "Chanta, junchan, kokushi support, weaker sequence shapes"],
+          ["Honors", 7, 28, "20.59%", "Yakuhai, defense, kokushi, no sequences"],
+          ["Terminals + honors", 13, 52, "38.24%", "Kokushi/chanta/toitoi defense pivots"],
+          ["One exact tile type", 1, 4, "2.94%", "Dora, wait tile, yakuhai pair/triplet"]
+        ]
+      },
+      start: {
+        columns: ["Event in starting 13", "Probability"],
+        rows: [
+          ["At least one pair-or-better tile type", "87.13%"],
+          ["No duplicated tile type", "12.87%"],
+          ["Exactly 1 duplicated tile type", "37.03%"],
+          ["Exactly 2 duplicated tile types", "34.72%"],
+          ["Exactly 3 duplicated tile types", "13.21%"],
+          ["At least one triplet-or-better", "8.77%"],
+          ["At least one quad", "0.178%"],
+          ["At least one tile of one specified dora type", "33.41%"],
+          ["Expected copies of one specified dora type", "0.382"]
+        ]
+      },
+      honors: {
+        columns: ["Count threshold", "Terminal + honor", "Honors only", "Terminals only"],
+        rows: [
+          ["At least 1", "99.87%", "95.74%", "92.98%"],
+          ["At least 3", "93.57%", "52.65%", "41.13%"],
+          ["At least 5", "60.35%", "9.87%", "5.38%"],
+          ["At least 7", "17.87%", "0.55%", "0.19%"],
+          ["At least 9", "1.83%", "0.008%", "0.002%"]
+        ]
+      },
+      waits: {
+        columns: ["Wait / shape", "Example", "Max outs", "Quality", "Notes"],
+        rows: [
+          ["Ryanmen", "45 waits 3/6", "8", "Best normal wait", "Two-sided; strongest ordinary riichi wait class"],
+          ["Sanmenchan", "34567 waits 2/5/8", "11–12 typical max", "Excellent", "Multi-sided; often high win rate"],
+          ["Nobetan", "23456 multi-interpretation", "Variable", "Excellent", "Multiple interpretations"],
+          ["Kanchan", "24 waits 3", "4", "Weak", "One tile type only"],
+          ["Penchan", "12 waits 3 / 89 waits 7", "4", "Weak", "Edge wait"],
+          ["Tanki", "single pair tile wait", "3", "Weak but flexible", "Can switch waits; honors can be defensive/value tiles"],
+          ["Shanpon", "two pairs wait either triplet", "4", "Medium", "Two tile types, two copies each"],
+          ["Kokushi 13-sided", "all 13 orphan types", "39", "Special max", "Rare yakuman pattern"]
+        ]
+      },
+      scoring: {
+        columns: ["Han/Fu", "Non-dealer ron", "Dealer ron", "Interpretation"],
+        rows: [
+          ["1 han 30 fu", "1,000", "1,500", "Minimum ordinary hand"],
+          ["1 han 40 fu", "1,300", "2,000", "Often closed ron + fu"],
+          ["2 han 30 fu", "2,000", "2,900", "Common cheap riichi/tanyao"],
+          ["2 han 40 fu", "2,600", "3,900", "Good cheap hand"],
+          ["3 han 30 fu", "3,900", "5,800", "Main riichi EV target"],
+          ["3 han 40 fu", "5,200", "7,700", "Strong mid-value hand"],
+          ["4 han 30 fu", "8,000", "12,000", "Kiriage mangan under WRC-style assumptions"],
+          ["5 han", "8,000", "12,000", "Mangan"],
+          ["6–7 han", "12,000", "18,000", "Haneman"],
+          ["8–10 han", "16,000", "24,000", "Baiman"],
+          ["11+ han", "24,000", "36,000", "Sanbaiman"],
+          ["Yakuman", "32,000", "48,000", "Limit hand"]
+        ]
+      },
+      pushFold: {
+        columns: ["Your state", "Opponent threat low", "Opponent riichi", "Dealer riichi / visible high value"],
+        rows: [
+          ["3+ shanten", "Build", "Fold", "Fold"],
+          ["2 shanten", "Build if safe", "Fold", "Fold"],
+          ["1 shanten, cheap", "Build cautiously", "Usually fold", "Fold"],
+          ["1 shanten, mangan+", "Push with safe tiles", "Mixed", "Usually fold unless rank-forced"],
+          ["Tenpai, bad wait, cheap", "Push if safe", "Mixed/fold", "Usually fold"],
+          ["Tenpai, good wait, 3900+", "Push", "Often push", "Mixed"],
+          ["Tenpai, mangan+", "Push", "Often push", "Often push if placement requires"],
+          ["Dealer tenpai", "Push more", "Push more", "Still respect deal-in risk"]
+        ]
+      }
+    };
+
+    const qs = (sel, root = document) => root.querySelector(sel);
+    const qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+    function pctToNum(value) {
+      if (typeof value === "number") return value;
+      const cleaned = String(value).replace(/[,%]/g, "").replace("–", "-");
+      const n = parseFloat(cleaned);
+      return Number.isFinite(n) ? n : NaN;
+    }
+
+    function renderTable(targetId, tableData) {
+      const target = document.getElementById(targetId);
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-wrap";
+      const table = document.createElement("table");
+      table.dataset.tableId = targetId;
+      const thead = document.createElement("thead");
+      const hr = document.createElement("tr");
+      tableData.columns.forEach((c, i) => {
+        const th = document.createElement("th");
+        th.textContent = c + " ↕";
+        th.addEventListener("click", () => sortTable(table, i));
+        hr.appendChild(th);
+      });
+      thead.appendChild(hr);
+      const tbody = document.createElement("tbody");
+      tableData.rows.forEach(row => {
+        const tr = document.createElement("tr");
+        row.forEach(cell => {
+          const td = document.createElement("td");
+          td.textContent = cell;
+          if (typeof cell === "number" || /^\d/.test(String(cell))) td.classList.add("num");
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.append(thead, tbody);
+      wrapper.appendChild(table);
+      target.innerHTML = "";
+      target.appendChild(wrapper);
+    }
+
+    function sortTable(table, colIndex) {
+      const tbody = qs("tbody", table);
+      const rows = [...tbody.rows];
+      const current = table.dataset.sortCol === String(colIndex) ? table.dataset.sortDir : "none";
+      const dir = current === "asc" ? "desc" : "asc";
+      rows.sort((a, b) => {
+        const av = a.cells[colIndex].textContent.trim();
+        const bv = b.cells[colIndex].textContent.trim();
+        const an = pctToNum(av);
+        const bn = pctToNum(bv);
+        let cmp;
+        if (Number.isFinite(an) && Number.isFinite(bn)) cmp = an - bn;
+        else cmp = av.localeCompare(bv, undefined, { numeric: true });
+        return dir === "asc" ? cmp : -cmp;
+      });
+      rows.forEach(r => tbody.appendChild(r));
+      table.dataset.sortCol = String(colIndex);
+      table.dataset.sortDir = dir;
+    }
+
+    function filterActiveTable() {
+      const term = qs("#tableSearch").value.toLowerCase().trim();
+      const active = qs(".tab-panel.active table");
+      if (!active) return;
+      qsa("tbody tr", active).forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
+      });
+    }
+
+    function factorialRatioCombFail(N, U, D) {
+      if (D <= 0) return U > 0 ? 0 : 0;
+      if (U <= 0) return 1;
+      if (U > N) return 0;
+      if (D > N) D = N;
+      let fail = 1;
+      for (let i = 0; i < D; i++) {
+        fail *= (N - U - i) / (N - i);
+        if (N - U - i <= 0) return 0;
+      }
+      return fail;
+    }
+
+    function hitProbability(N, U, D) {
+      if (N <= 0 || D <= 0 || U <= 0) return 0;
+      if (U >= N) return 1;
+      return 1 - factorialRatioCombFail(N, U, Math.min(D, N));
+    }
+
+    function formatPct(x) { return (x * 100).toFixed(x > 0.995 ? 1 : 1) + "%"; }
+    function formatPoints(x) { return (x >= 0 ? "+" : "−") + Math.abs(Math.round(x)).toLocaleString(); }
+
+    function calcUkeire() {
+      const N = Number(qs("#liveTiles").value);
+      const U = Number(qs("#outs").value);
+      const D = Number(qs("#draws").value);
+      const p = hitProbability(N, U, D);
+      qs("#ukeireResult").textContent = formatPct(p);
+      qs("#ukeireNote").textContent = `${U} live outs among ${N} unknown live tiles over ${D} own draws.`;
+      const bars = qs("#ukeireBars");
+      bars.innerHTML = "";
+      [1, 2, 4, 8, 12, 16].forEach(d => {
+        const bp = hitProbability(N, U, d);
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = `<span>${d} draws</span><div class="bar-track"><div class="bar" style="width:${Math.min(100, bp * 100)}%"></div></div><span>${formatPct(bp)}</span>`;
+        bars.appendChild(row);
+      });
+    }
+
+    function calcEv() {
+      const pWin = Number(qs("#pWin").value) / 100;
+      const winValue = Number(qs("#winValue").value);
+      const pTenpai = Number(qs("#pTenpai").value) / 100;
+      const tenpaiValue = Number(qs("#tenpaiValue").value);
+      const pDeal = Number(qs("#pDeal").value) / 100;
+      const dealLoss = Number(qs("#dealLoss").value);
+      const pOther = Number(qs("#pOther").value) / 100;
+      const otherLoss = Number(qs("#otherLoss").value);
+      const cost = Number(qs("#cost").value);
+      const rankAdjust = Number(qs("#rankAdjust").value);
+      const ev = pWin * winValue + pTenpai * tenpaiValue - pDeal * dealLoss - pOther * otherLoss - cost + rankAdjust;
+      qs("#evResult").textContent = formatPoints(ev);
+      qs("#evNote").textContent = ev >= 0 ? "Positive EV suggests the action is viable under this simplified model." : "Negative EV suggests folding, dama, or a safer line may be superior.";
+    }
+
+    function calcRiichi() {
+      const damaEV = Number(qs("#damaWin").value) / 100 * Number(qs("#damaValue").value);
+      const riichiEV = Number(qs("#riichiWin").value) / 100 * Number(qs("#riichiValue").value) - 1000 - (Number(qs("#riichiDeal").value) / 100 * Number(qs("#riichiLoss").value));
+      const diff = riichiEV - damaEV;
+      qs("#riichiResult").textContent = diff >= 0 ? `Riichi ${formatPoints(diff)}` : `Dama ${formatPoints(-diff)}`;
+      qs("#riichiNote").textContent = diff >= 0 ? "Riichi is favored by the current assumptions." : "Dama is favored by the current assumptions.";
+    }
+
+    function calcPushFold() {
+      const shanten = Number(qs("#myShanten").value);
+      const value = qs("#myValue").value;
+      const wait = qs("#waitQuality").value;
+      const threat = qs("#threatLevel").value;
+      let result = "Fold";
+      let note = "Threat and hand state do not justify pushing.";
+
+      if (threat === "low") {
+        result = shanten <= 1 ? "Build / Push" : "Build safely";
+        note = "Low threat permits normal tile efficiency unless the hand is slow and low value.";
+      } else if (shanten >= 2) {
+        result = "Fold";
+        note = "Two or more shanten against clear threat is usually too slow.";
+      } else if (shanten === 1) {
+        if (value === "mangan" && threat !== "dealer") {
+          result = "Mixed push";
+          note = "High value 1-shanten can push if discards are reasonably safe and ukeire is strong.";
+        } else {
+          result = "Fold-biased";
+          note = "One-shanten hands require value, acceptance, and a safe path to continue.";
+        }
+      } else {
+        if (value === "mangan" || (value === "mid" && wait === "good" && threat !== "dealer")) {
+          result = "Push";
+          note = "Tenpai with solid value and wait quality is often worth pushing.";
+        } else if (threat === "dealer" && value !== "mangan") {
+          result = "Mixed/fold";
+          note = "Dealer or visible high-value threat demands stronger EV to push.";
+        } else {
+          result = "Mixed";
+          note = "Compare tile safety, wait quality, honba, sticks, and placement utility.";
+        }
+      }
+      qs("#pushFoldResult").textContent = result;
+      qs("#pushFoldNote").textContent = note;
+    }
+
+    function initTabs() {
+      qsa(".tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          qsa(".tab").forEach(t => t.classList.remove("active"));
+          qsa(".tab-panel").forEach(p => p.classList.remove("active"));
+          tab.classList.add("active");
+          qs(`#${tab.dataset.tab}`).classList.add("active");
+          qs("#tableSearch").value = "";
+          filterActiveTable();
+        });
+      });
+    }
+
+    function initTheme() {
+      const stored = localStorage.getItem("riichi-theme");
+      if (stored) document.documentElement.dataset.theme = stored;
+      qs("#themeToggle").addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem("riichi-theme", next);
+      });
+    }
+
+    function init() {
+      Object.entries(DATA).forEach(([key, value]) => {
+        if (document.getElementById(key)) renderTable(key, value);
+      });
+      renderTable("pushFoldTable", DATA.pushFold);
+      initTabs();
+      initTheme();
+      qs("#tableSearch").addEventListener("input", filterActiveTable);
+      qs("#resetSearch").addEventListener("click", () => { qs("#tableSearch").value = ""; filterActiveTable(); });
+      qs("#calcUkeire").addEventListener("click", calcUkeire);
+      qs("#calcEv").addEventListener("click", calcEv);
+      qs("#calcRiichi").addEventListener("click", calcRiichi);
+      qs("#calcPushFold").addEventListener("click", calcPushFold);
+      qs("#printBtn").addEventListener("click", () => window.print());
+      ["liveTiles", "outs", "draws"].forEach(id => qs(`#${id}`).addEventListener("input", calcUkeire));
+      ["pWin", "winValue", "pTenpai", "tenpaiValue", "pDeal", "dealLoss", "pOther", "otherLoss", "cost", "rankAdjust"].forEach(id => qs(`#${id}`).addEventListener("input", calcEv));
+      ["damaWin", "damaValue", "riichiWin", "riichiValue", "riichiDeal", "riichiLoss"].forEach(id => qs(`#${id}`).addEventListener("input", calcRiichi));
+      ["myShanten", "myValue", "waitQuality", "threatLevel"].forEach(id => qs(`#${id}`).addEventListener("change", calcPushFold));
+      calcUkeire(); calcEv(); calcRiichi(); calcPushFold();
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
