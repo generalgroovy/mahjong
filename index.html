@@ -157,11 +157,21 @@
     .table-tools button { flex: 0 0 auto; }
     input[type="range"] { min-width: 140px; padding: 0; }
     .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; }
-    table { width: 100%; border-collapse: collapse; background: var(--panel); }
+    table { width: 100%; min-width: 720px; border-collapse: collapse; background: var(--panel); }
     th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
     th { cursor: pointer; user-select: none; font-size: 0.85rem; color: var(--muted); background: var(--panel-2); position: sticky; top: 0; }
     tr:last-child td { border-bottom: 0; }
     td.num { font-variant-numeric: tabular-nums; text-align: right; }
+    .waits-table { min-width: 840px; table-layout: fixed; }
+    .waits-table th:nth-child(1), .waits-table td:nth-child(1) { width: 18%; }
+    .waits-table th:nth-child(2), .waits-table td:nth-child(2) { width: 24%; }
+    .waits-table th:nth-child(3), .waits-table td:nth-child(3) { width: 14%; }
+    .waits-table th:nth-child(4), .waits-table td:nth-child(4) { width: 18%; }
+    .waits-table th:nth-child(5), .waits-table td:nth-child(5) { width: 26%; }
+    .waits-table td:nth-child(1) { font-weight: 800; }
+    .waits-table td:nth-child(2) { font-family: var(--mono); font-size: 0.9rem; }
+    .waits-table td:nth-child(3), .waits-table td:nth-child(4) { white-space: nowrap; }
+    .waits-table td:nth-child(4) { font-weight: 700; color: var(--accent); }
     .pill {
       display: inline-block;
       border-radius: 999px;
@@ -751,6 +761,7 @@ Can declare kan?
       wrapper.className = "table-wrap";
       const table = document.createElement("table");
       table.dataset.tableId = targetId;
+      table.className = `${targetId}-table`;
       const thead = document.createElement("thead");
       const hr = document.createElement("tr");
       tableData.columns.forEach((c, i) => {
@@ -763,10 +774,11 @@ Can declare kan?
       const tbody = document.createElement("tbody");
       tableData.rows.forEach(row => {
         const tr = document.createElement("tr");
-        row.forEach(cell => {
+        row.forEach((cell, index) => {
           const td = document.createElement("td");
           td.textContent = cell;
-          if (typeof cell === "number" || /^\d/.test(String(cell))) td.classList.add("num");
+          td.dataset.label = tableData.columns[index];
+          if (isNumericColumn(tableData.columns[index], cell)) td.classList.add("num");
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -775,6 +787,13 @@ Can declare kan?
       wrapper.appendChild(table);
       target.innerHTML = "";
       target.appendChild(wrapper);
+    }
+
+    function isNumericColumn(column, cell) {
+      if (typeof cell === "number") return true;
+      if (/example|notes|strategic|interpretation|event|your state|wait \/ shape/i.test(column)) return false;
+      if (/copies|share|probability|score|max outs|han|fu|points|rate|ev|ron|tile types/i.test(column)) return true;
+      return /^[+-]?\d/.test(String(cell).trim());
     }
 
     function sortTable(table, colIndex) {
