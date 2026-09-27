@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Riichi Mahjong GTO Toolkit</title>
-  <meta name="description" content="Interactive riichi mahjong tile statistics, hand statistics, EV models, and decision trees for near-optimal gameplay." />
+  <title>Riichi Mahjong Study Toolkit</title>
+  <meta name="description" content="Interactive riichi mahjong tile statistics, hand statistics, EV models, and decision trees for studying gameplay." />
   <style>
     :root {
       --bg: #f8fafc;
@@ -287,7 +287,7 @@
 <body>
   <div class="topbar no-print">
     <nav class="nav" aria-label="Site navigation">
-      <span class="brand">Riichi GTO Toolkit</span>
+      <span class="brand">Riichi Study Toolkit</span>
       <a href="#statistics">Stats</a>
       <a href="#calculators">Calculators</a>
       <a href="#trees">Decision Trees</a>
@@ -302,9 +302,9 @@
   <main class="shell">
     <header class="hero">
       <div class="hero-card">
-        <h1>Riichi Mahjong Near-GTO Toolkit</h1>
+        <h1>Riichi Mahjong Study Toolkit</h1>
         <p>Interactive tile statistics, hand statistics, probability calculators, EV models, and decision trees for rigorous Japanese riichi mahjong decisions.</p>
-        <p><strong>Scope:</strong> Japanese riichi mahjong, WRC-style assumptions. Exact GTO mahjong is not solved; this site models near-optimal gameplay with shanten, ukeire, EV, opponent threat estimation, and rank utility.</p>
+        <p><strong>Scope:</strong> Japanese riichi mahjong, WRC-style assumptions. Exact GTO mahjong is not solved; this site offers simplified study models for shanten, ukeire, EV, opponent threat estimation, and rank utility.</p>
         <div class="badge-row" aria-label="Key assumptions">
           <span class="badge">136 tiles</span>
           <span class="badge">34 tile types</span>
@@ -564,7 +564,7 @@ Can declare kan?
     <section id="policy">
       <div class="section-head">
         <div>
-          <h2>Near-GTO policy matrix</h2>
+          <h2>Strategy reference matrix</h2>
           <p>Action-level heuristics organized by phase, threat, and hand state.</p>
         </div>
       </div>
@@ -851,6 +851,12 @@ Can declare kan?
       const N = Number(qs("#liveTiles").value);
       const U = Number(qs("#outs").value);
       const D = Number(qs("#draws").value);
+      if (![N, U, D].every(Number.isInteger) || N <= 0 || U < 0 || U > N || D < 0 || D > N) {
+        qs("#ukeireResult").textContent = "—";
+        qs("#ukeireNote").textContent = "Use whole tile counts: live tiles must be positive, and outs and draws must be between zero and live tiles.";
+        qs("#ukeireBars").innerHTML = "";
+        return;
+      }
       const p = hitProbability(N, U, D);
       qs("#ukeireResult").textContent = formatPct(p);
       qs("#ukeireNote").textContent = `${U} live outs among ${N} unknown live tiles over ${D} own draws.`;
@@ -941,12 +947,13 @@ Can declare kan?
     }
 
     function initTheme() {
-      const stored = localStorage.getItem("riichi-theme");
-      if (stored) document.documentElement.dataset.theme = stored;
+      let stored;
+      try { stored = localStorage.getItem("riichi-theme"); } catch {}
+      if (["dark", "light"].includes(stored)) document.documentElement.dataset.theme = stored;
       qs("#themeToggle").addEventListener("click", () => {
         const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
         document.documentElement.dataset.theme = next;
-        localStorage.setItem("riichi-theme", next);
+        try { localStorage.setItem("riichi-theme", next); } catch {}
       });
     }
 
