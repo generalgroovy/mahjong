@@ -4,7 +4,7 @@
 
 ## Find a reference
 
-Use the page navigation to open **Stats**, **Calculators**, **Decision Trees**, **Policy**, **Solver** or **Sources**. Statistics tabs switch between tile classes, starting hands, terminals/honors, wait quality and scoring. Search filters the active table; click a column heading to sort. **Print / PDF** opens the browser's print workflow.
+Use the page navigation to open **Stats**, **Calculators**, **Decision Trees**, **Policy**, **Solver** or **Sources**. Statistics tabs switch between tile classes, starting hands, terminals/honors, wait quality and scoring. Search filters the active table; activate a column-heading button to sort with mouse or keyboard. A filter with no matches shows a recovery message; **Clear** restores the active table. **Print / PDF** opens the browser's print workflow.
 
 ## Use the calculators
 
@@ -26,7 +26,7 @@ Serve this repository with a static HTTP server, for example `python -m http.ser
 With Node.js 18 or newer:
 
 ```sh
-node --test tests/calculator.test.cjs
+node --test tests/*.cjs
 ```
 
-Tests cover a small exact probability example, impossible/fractional count rejection and blocked theme storage. They do not independently verify every reference table, scoring rule, expected-value assumption or strategy recommendation. For browser QA, switch/search/sort tables, test valid and invalid tile counts, change theme and inspect print preview.
+Tests cover a small exact probability example, impossible/fractional count rejection blocked theme storage, sortable headers and empty filter recovery. They do not independently verify every reference table, scoring rule, expected-value assumption or strategy recommendation. For browser QA, switch/search/sort tables, test valid and invalid tile counts, change theme and inspect print preview.

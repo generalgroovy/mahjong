@@ -282,6 +282,8 @@
       .tab-panel { display: block !important; }
       .print-only { display: block; }
     }
+      .sort-button { background: transparent; color: inherit; border: 0; border-radius: 0; padding: 0; font: inherit; text-align: inherit; width: 100%; cursor: pointer; }
+    .sort-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   </style>
 </head>
 <body>
@@ -343,6 +345,7 @@
         <div class="table-tools">
           <input id="tableSearch" type="search" placeholder="Filter active table..." aria-label="Filter active table" />
           <button type="button" id="resetSearch">Clear</button>
+          <span id="tableFeedback" role="status"></span>
         </div>
         <div id="tiles" class="tab-panel active"></div>
         <div id="start" class="tab-panel"></div>
@@ -766,8 +769,14 @@ Can declare kan?
       const hr = document.createElement("tr");
       tableData.columns.forEach((c, i) => {
         const th = document.createElement("th");
-        th.textContent = c + " ↕";
-        th.addEventListener("click", () => sortTable(table, i));
+        th.setAttribute("aria-sort", "none");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "sort-button";
+        button.textContent = c + " ↕";
+        button.setAttribute("aria-label", `Sort by ${c}`);
+        button.addEventListener("click", () => sortTable(table, i));
+        th.appendChild(button);
         hr.appendChild(th);
       });
       thead.appendChild(hr);
@@ -814,15 +823,23 @@ Can declare kan?
       rows.forEach(r => tbody.appendChild(r));
       table.dataset.sortCol = String(colIndex);
       table.dataset.sortDir = dir;
+      qsa("thead th", table).forEach((header, index) => {
+        header.setAttribute("aria-sort", index === colIndex ? (dir === "asc" ? "ascending" : "descending") : "none");
+      });
     }
 
     function filterActiveTable() {
       const term = qs("#tableSearch").value.toLowerCase().trim();
       const active = qs(".tab-panel.active table");
       if (!active) return;
-      qsa("tbody tr", active).forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
+      const rows = qsa("tbody tr", active);
+      let visible = 0;
+      rows.forEach(row => {
+        const matches = row.textContent.toLowerCase().includes(term);
+        row.style.display = matches ? "" : "none";
+        if (matches) visible++;
       });
+      qs("#tableFeedback").textContent = term ? (visible ? `${visible} of ${rows.length} rows` : "No matching rows. Clear the filter to reset.") : "";
     }
 
     function factorialRatioCombFail(N, U, D) {
