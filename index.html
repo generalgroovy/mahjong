@@ -285,11 +285,13 @@
       .sort-button { background: transparent; color: inherit; border: 0; border-radius: 0; padding: 0; font: inherit; text-align: inherit; width: 100%; cursor: pointer; }
     .sort-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   </style>
+<link rel="stylesheet" href="challenges.css">
 </head>
 <body>
   <div class="topbar no-print">
     <nav class="nav" aria-label="Site navigation">
       <span class="brand">Riichi Study Toolkit</span>
+      <a href="#challenges">Practice</a>
       <a href="#statistics">Stats</a>
       <a href="#calculators">Calculators</a>
       <a href="#trees">Decision Trees</a>
@@ -305,26 +307,24 @@
     <header class="hero">
       <div class="hero-card">
         <h1>Riichi Mahjong Study Toolkit</h1>
-        <p>Interactive tile statistics, hand statistics, probability calculators, EV models, and decision trees for rigorous Japanese riichi mahjong decisions.</p>
-        <p><strong>Scope:</strong> Japanese riichi mahjong, WRC-style assumptions. Exact GTO mahjong is not solved; this site offers simplified study models for shanten, ukeire, EV, opponent threat estimation, and rank utility.</p>
+        <p>Practice decisions. Explore tiles, waits, and scoring.</p><a class="practice-link" href="#challenges" data-practice="discard">Start practice →</a>
+        <details><summary>Info</summary><p><strong>Scope:</strong> Japanese riichi mahjong, WRC-style assumptions. Exact GTO mahjong is not solved; this site offers simplified study models for shanten, ukeire, EV, opponent threat estimation, and rank utility.</p>
         <div class="badge-row" aria-label="Key assumptions">
           <span class="badge">136 tiles</span>
           <span class="badge">34 tile types</span>
           <span class="badge">4 players</span>
           <span class="badge">Hidden information</span>
           <span class="badge">Rank-adjusted EV</span>
-        </div>
+        </div></details>
       </div>
-      <aside class="controls-card card">
-        <h2 style="margin:0; letter-spacing:-0.035em;">Fast facts</h2>
+      <details class="controls-card card"><summary>Reference facts</summary>
         <div class="stat-grid">
           <div class="stat"><b>87.13%</b><span>starting hands with at least one pair-or-better</span></div>
           <div class="stat"><b>8.77%</b><span>starting hands with at least one triplet-or-better</span></div>
           <div class="stat"><b>33.41%</b><span>chance to start with at least one exact dora type</span></div>
           <div class="stat"><b>17.87%</b><span>chance to start with 7+ terminals/honors</span></div>
         </div>
-        <div class="callout">Use the tabs and calculators below to convert static strategy into action-level decisions.</div>
-      </aside>
+        </details>
     </header>
 
     <section id="statistics">
@@ -345,7 +345,7 @@
         <div class="table-tools">
           <input id="tableSearch" type="search" placeholder="Filter active table..." aria-label="Filter active table" />
           <button type="button" id="resetSearch">Clear</button>
-          <span id="tableFeedback" role="status"></span>
+          <span id="tableFeedback" role="status"></span><a class="practice-link" id="practiceTable" href="#challenges" data-practice="discard">Practice this topic →</a>
         </div>
         <div id="tiles" class="tab-panel active"></div>
         <div id="start" class="tab-panel"></div>
@@ -439,7 +439,50 @@
       </div>
     </section>
 
+    <section id="challenges">
+      <div class="section-head">
+        <div>
+          <h2>Challenge lab</h2>
+          <p>Choose a drill. Answer, then compare your reasoning.</p>
+        </div>
+      </div>
+      <div class="card challenge-shell">
+        <div class="challenge-toolbar">
+          <div class="challenge-modes" role="group" aria-label="Challenge type">
+            <button class="challenge-mode active" type="button" data-mode="discard">Best discard</button>
+            <button class="challenge-mode" type="button" data-mode="wait">Read the wait</button>
+            <button class="challenge-mode" type="button" data-mode="value">Best hand</button>
+            <button class="challenge-mode" type="button" data-mode="safety">Safety first</button>
+            <button class="challenge-mode" type="button" data-mode="call">Call or pass</button>
+          </div>
+          <div class="challenge-score" aria-label="Challenge score">
+            <span>Correct<strong id="challengeCorrect">0</strong></span>
+            <span>Played<strong id="challengePlayed">0</strong></span>
+            <span>Streak<strong id="challengeStreak">0</strong></span>
+          </div>
+        </div>
+        <div class="challenge-body">
+          <div class="challenge-stage">
+            <p class="challenge-kicker" id="challengeProgress">Best discard · 1 of 3</p>
+            <h3 id="challengePrompt" tabindex="-1">Which tile preserves the strongest tenpai?</h3>
+            <p class="challenge-context" id="challengeContext"></p>
+            <div class="hand" id="challengeHand" aria-label="Mahjong hand"></div>
+            <div class="challenge-options" id="challengeOptions"></div>
+          </div>
+          <aside class="challenge-aside">
+            <div class="challenge-feedback" id="challengeFeedback" aria-live="polite">
+              <h3 class="feedback-status">Commit before you calculate</h3>
+              <p>Look for shanten first, then ukeire, value, and safety. The explanation appears after your choice.</p>
+            </div>
+            <button class="primary challenge-next" id="challengeNext" type="button" hidden>Next challenge</button>
+            <details class="challenge-info"><summary>Info &amp; notation</summary><p>m = characters · p = circles · s = bamboo · E = east · R = red dragon. These fixed study examples isolate a stated situation; they are not a full hand solver. Answer explanations link back to the relevant reference.</p><p>Rules reference: <a href="https://mahjong-europe.org/portal/images/docs/Riichi-rules-2025-EN.pdf" target="_blank" rel="noopener">EMA Riichi Rules 2025</a>. Strategy answers depend on their stated assumptions.</p></details>
+          </aside>
+        </div>
+      </div>
+    </section>
+
     <section id="trees">
+      <a class="practice-link" href="#challenges" data-practice="safety">Practice defense →</a>
       <div class="section-head">
         <div>
           <h2>Decision trees</h2>
@@ -565,6 +608,7 @@ Can declare kan?
     </section>
 
     <section id="policy">
+      <a class="practice-link" href="#challenges" data-practice="call">Practice calls →</a>
       <div class="section-head">
         <div>
           <h2>Strategy reference matrix</h2>
@@ -997,5 +1041,6 @@ Can declare kan?
 
     document.addEventListener("DOMContentLoaded", init);
   </script>
+<script src="challenges.js"></script>
 </body>
 </html>
