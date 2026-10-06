@@ -66,7 +66,11 @@
 .hero details summary { cursor:pointer; padding:8px 0; font-weight:700; } .hero>.controls-card { align-self:start; }
 
 /* Practice is the first useful action; reference depth stays one link away. */
-.hero { padding-top: 10px; gap: 14px; }
+.hero { display: block; padding: 8px 0 0; }
+.hero .hero-card { padding: 0; border: 0; background: transparent; box-shadow: none; }
+.hero .hero-card > details { display: inline-block; margin: 0 0 0 16px; padding: 0 10px; vertical-align: middle; }
+.hero .hero-card > details[open] { display: block; margin: 8px 0; padding: 12px 14px; }
+.hero .hero-card > p { margin-bottom: 2px; }
 .hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.12; margin-bottom: 12px; }
 .hero-card { padding: 20px; }
 section { scroll-margin-top: 80px; }
@@ -109,6 +113,7 @@ section { scroll-margin-top: 80px; }
   .sequence-layout { grid-template-columns: 1fr; gap: 18px; }
 }
 @media(max-width: 520px) {
+  .hero h1 { font-size: 1.8rem; }
   .sequence-options { grid-template-columns: repeat(5, minmax(44px, 1fr)); gap: 7px; }
   .sequence-lab .hand { margin: 14px 0 18px; }
   #scenarioDrills { padding: 8px; }

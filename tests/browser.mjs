@@ -78,7 +78,7 @@ try {
     await page.locator('[data-tab="waits"]').click();
     await page.locator('#practiceTable').click();
     assert.equal(await page.locator('#scenarioDrills').getAttribute('open'), '');
-    assert.match(await page.locator('#challengeProgress').innerText(), /Read the wait/);
+    assert.match(await page.locator('#challengeProgress').innerText(), /Read the wait/i);
     await page.locator('#challengeOptions button').filter({ hasText: /^3m or 6m$/ }).click();
     assert.match(await page.locator('#challengeFeedback').innerText(), /ryanmen/);
     await page.locator('#liveTiles').fill('4'); await page.locator('#outs').fill('1'); await page.locator('#draws').fill('2');
