@@ -17,4 +17,14 @@ Primary journey: try a short tile exercise, commit an answer, inspect why each t
 
 ## Evidence
 
-Pending implementation and checks.
+- Local: 12/12 Node tests pass; both runtime scripts and browser test script pass Node syntax checks. The independent oracle covers every legal 2-, 5- and 8-tile inventory (including shapes with no completion), reconstructs every returned partition, and tests zero remaining copies and impossible inventories.
+- GitHub CI: [run 37539765379](https://github.com/generalgroovy/mahjong/actions/runs/37539765379) passed on runtime commit `f0ccf98`. All 12 model/regression tests plus real Chromium workflows at 1366×768, 390×844 and 320×844 passed with no page errors or document overflow. CI outputs are copied to `docs/evidence/2026-10-06/ci/`.
+- Local CUA: observed 1366×768 and 320×844. Verified keyboard selection of 3m+6m for 45m; 34567m all three completions; wrong-answer retry does not inflate first-try accuracy; invalid five-copy custom input preserves the exercise; reveal works; no console errors or horizontal page overflow. Saved `desktop-start.png`, `desktop-multi-wait.png`, `phone-multi-wait.png`.
+- Iteration: first browser run 37539633207 failed because the assertion expected mixed-case text while CSS transforms it to uppercase. Case-insensitive assertion fixed; application topic navigation itself was correct. Visual review also moved reference facts under Info and compressed the introduction so the default exercise appears sooner.
+- Calculator audit: bounded the unknown pool at 136 to prevent huge input loops and removed chart rows whose number of draws exceeds the pool. A four-tile pool now shows only 1, 2 and 4 draws. Existing probability and storage tests still pass.
+- Self-review: baseline-to-candidate diff preserves original 15 drills, source links, calculator formulas, theme/session storage and reference controls. New runtime uses native buttons/selects, explicit selected states, finite catalogues (15/88/306 shapes), no dependencies/network/storage, and text-only DOM insertion. Strict UTF-8 validation and diff whitespace checks passed.
+- Not run: physical-device/screen-reader testing, beginner learner sessions, print-dialog inspection, and independent revalidation of all pre-existing table/strategy content. No solved-game, GTO, full-hand solver or learning-outcome claim.
+
+## Parent release
+
+Promote the reviewed candidate with a fast-forward and verify GitHub Pages. Runtime files: `index.html`, `challenges.css`, `challenges.js`, `sequence-model.js`, `sequence-lab.js`. No portfolio edits or main push were performed by this owner. Public link remains https://generalgroovy.github.io/mahjong/.

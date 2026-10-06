@@ -1,0 +1,29 @@
+[
+  {
+    "width": 1366,
+    "passed": true,
+    "errors": [],
+    "metrics": {
+      "width": 1366,
+      "scroll": 1366
+    }
+  },
+  {
+    "width": 390,
+    "passed": true,
+    "errors": [],
+    "metrics": {
+      "width": 390,
+      "scroll": 390
+    }
+  },
+  {
+    "width": 320,
+    "passed": true,
+    "errors": [],
+    "metrics": {
+      "width": 320,
+      "scroll": 320
+    }
+  }
+]
