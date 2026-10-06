@@ -307,7 +307,7 @@
     <header class="hero">
       <div class="hero-card">
         <h1>Riichi Mahjong Study Toolkit</h1>
-        <p>Practice decisions. Explore tiles, waits, and scoring.</p><a class="practice-link" href="#challenges" data-practice="discard">Start practice →</a>
+        <p>Practice decisions. Explore tiles, waits, and scoring.</p><a class="practice-link" href="#challenges">Start practice →</a>
         <details><summary>Info</summary><p><strong>Scope:</strong> Japanese riichi mahjong, WRC-style assumptions. Exact GTO mahjong is not solved; this site offers simplified study models for shanten, ukeire, EV, opponent threat estimation, and rank utility.</p>
         <div class="badge-row" aria-label="Key assumptions">
           <span class="badge">136 tiles</span>
@@ -326,6 +326,91 @@
         </div>
         </details>
     </header>
+
+    <section id="challenges">
+      <div class="section-head">
+        <div>
+          <h2>Practice</h2>
+          <p>Start with a shape. Find its missing tiles.</p>
+        </div>
+      </div>
+      <article class="card sequence-lab" aria-labelledby="sequenceTitle">
+        <div class="sequence-heading"><h3 id="sequenceTitle">Sequence builder</h3><span id="sequenceScore">First try a two-tile shape</span></div>
+        <p class="sequence-scope">Partial shape · sequences only</p>
+        <div class="sequence-layout">
+          <div>
+            <h4 id="sequencePrompt" tabindex="-1">Which tiles complete one sequence?</h4>
+            <p class="sequence-hint">A sequence is three numbers in a row in the same suit, like 3–4–5.</p>
+            <div class="hand" id="sequenceHand" aria-label="Tiles in the shape"></div>
+            <div id="sequenceOptions" class="sequence-options" role="group" aria-label="Select every completing tile"></div>
+            <button id="sequenceNone" type="button" aria-pressed="false">None left</button>
+            <div class="sequence-actions">
+              <button id="sequenceCheck" class="primary" type="button" disabled>Check tiles</button>
+              <button id="sequenceReveal" type="button">Show me</button>
+              <button id="sequenceNext" class="primary" type="button" hidden>New shape</button>
+              <button id="sequenceRetry" type="button" hidden>Try again</button>
+            </div>
+          </div>
+          <div>
+            <div id="sequenceFeedback" class="sequence-feedback" role="status" aria-live="polite"></div>
+            <details class="sequence-settings"><summary>Change the exercise</summary>
+              <label for="sequenceLevel">Build</label>
+              <select id="sequenceLevel"><option value="1">1 sequence · 2 tiles</option><option value="2">2 sequences · 5 tiles</option><option value="3">3 sequences · 8 tiles</option></select>
+              <label for="sequenceSuit">Suit</label>
+              <select id="sequenceSuit"><option value="m">Characters · m</option><option value="p">Circles · p</option><option value="s">Bamboo · s</option></select>
+              <label class="check-label"><input id="sequenceVisible" type="checkbox"> Add visible tiles</label>
+              <p>“Seen” means copies outside this shape. Choose only completions with at least one copy unseen.</p>
+              <form id="sequenceCustomForm">
+                <label for="sequenceCustom">Try your own shape</label>
+                <div class="custom-shape-row"><input id="sequenceCustom" type="text" inputmode="numeric" maxlength="32" placeholder="34567" aria-describedby="sequenceCustomHint sequenceCustomError"><button type="submit">Use shape</button></div>
+                <small id="sequenceCustomHint">2, 5 or 8 numbers. One suit. Visible tiles reset.</small>
+                <p id="sequenceCustomError" role="alert"></p>
+              </form>
+            </details>
+            <details class="sequence-settings"><summary>What this teaches</summary>
+              <p>Rearrange every shown tile plus one new tile into sequences of three. Overlapping shapes may accept more than two different tiles. There are four copies of each tile; copies here and already seen reduce how many remain unseen.</p>
+              <p>This is part of a hand, not a complete winning-hand test. Pairs, triplets, yaku and furiten are outside the exercise. Unseen tiles can be in other players’ hands or the dead wall; the count is not a draw probability.</p>
+              <p>m = characters · p = circles · s = bamboo. <a href="https://mahjong-europe.org/portal/images/docs/Riichi-rules-2025-EN.pdf" target="_blank" rel="noopener">EMA rules</a> · <a href="#statistics">Wait reference</a></p>
+            </details>
+          </div>
+        </div>
+      </article>
+      <details id="scenarioDrills"><summary>Decision drills · discard, wait, value, safety and calls</summary>
+      <div class="card challenge-shell">
+        <div class="challenge-toolbar">
+          <div class="challenge-modes" role="group" aria-label="Challenge type">
+            <button class="challenge-mode active" type="button" data-mode="discard">Best discard</button>
+            <button class="challenge-mode" type="button" data-mode="wait">Read the wait</button>
+            <button class="challenge-mode" type="button" data-mode="value">Best hand</button>
+            <button class="challenge-mode" type="button" data-mode="safety">Safety first</button>
+            <button class="challenge-mode" type="button" data-mode="call">Call or pass</button>
+          </div>
+          <div class="challenge-score" aria-label="Challenge score">
+            <span>Correct<strong id="challengeCorrect">0</strong></span>
+            <span>Played<strong id="challengePlayed">0</strong></span>
+            <span>Streak<strong id="challengeStreak">0</strong></span>
+          </div>
+        </div>
+        <div class="challenge-body">
+          <div class="challenge-stage">
+            <p class="challenge-kicker" id="challengeProgress">Best discard · 1 of 3</p>
+            <h3 id="challengePrompt" tabindex="-1">Which tile preserves the strongest tenpai?</h3>
+            <p class="challenge-context" id="challengeContext"></p>
+            <div class="hand" id="challengeHand" aria-label="Mahjong hand"></div>
+            <div class="challenge-options" id="challengeOptions"></div>
+          </div>
+          <aside class="challenge-aside">
+            <div class="challenge-feedback" id="challengeFeedback" aria-live="polite">
+              <h3 class="feedback-status">Commit before you calculate</h3>
+              <p>Look for shanten first, then ukeire, value, and safety. The explanation appears after your choice.</p>
+            </div>
+            <button class="primary challenge-next" id="challengeNext" type="button" hidden>Next challenge</button>
+            <details class="challenge-info"><summary>Info &amp; notation</summary><p>m = characters · p = circles · s = bamboo · E = east · R = red dragon. These fixed study examples isolate a stated situation; they are not a full hand solver. Answer explanations link back to the relevant reference.</p><p>Rules reference: <a href="https://mahjong-europe.org/portal/images/docs/Riichi-rules-2025-EN.pdf" target="_blank" rel="noopener">EMA Riichi Rules 2025</a>. Strategy answers depend on their stated assumptions.</p></details>
+          </aside>
+        </div>
+      </div>
+      </details>
+    </section>
 
     <section id="statistics">
       <div class="section-head">
@@ -368,9 +453,9 @@
           <h3>Ukeire draw probability</h3>
           <p class="muted">Probability of drawing at least one live out in a given number of own draws.</p>
           <div class="calc-grid">
-            <div class="field"><label for="liveTiles">Unknown live tiles</label><input id="liveTiles" type="number" min="1" max="120" value="70" /></div>
-            <div class="field"><label for="outs">Live outs</label><input id="outs" type="number" min="0" max="70" value="8" /></div>
-            <div class="field"><label for="draws">Own draws left</label><input id="draws" type="number" min="0" max="25" value="8" /></div>
+            <div class="field"><label for="liveTiles">Unknown live tiles</label><input id="liveTiles" type="number" min="1" max="136" value="70" /></div>
+            <div class="field"><label for="outs">Live outs</label><input id="outs" type="number" min="0" max="136" value="8" /></div>
+            <div class="field"><label for="draws">Own draws left</label><input id="draws" type="number" min="0" max="136" value="8" /></div>
             <div><button class="primary" id="calcUkeire" type="button">Calculate</button></div>
           </div>
           <div class="result-box" style="margin-top:14px;">
@@ -436,48 +521,6 @@
             <span class="muted" id="pushFoldNote">Tenpai with good wait and 3900+ value is often worth pushing against one riichi.</span>
           </div>
         </article>
-      </div>
-    </section>
-
-    <section id="challenges">
-      <div class="section-head">
-        <div>
-          <h2>Challenge lab</h2>
-          <p>Choose a drill. Answer, then compare your reasoning.</p>
-        </div>
-      </div>
-      <div class="card challenge-shell">
-        <div class="challenge-toolbar">
-          <div class="challenge-modes" role="group" aria-label="Challenge type">
-            <button class="challenge-mode active" type="button" data-mode="discard">Best discard</button>
-            <button class="challenge-mode" type="button" data-mode="wait">Read the wait</button>
-            <button class="challenge-mode" type="button" data-mode="value">Best hand</button>
-            <button class="challenge-mode" type="button" data-mode="safety">Safety first</button>
-            <button class="challenge-mode" type="button" data-mode="call">Call or pass</button>
-          </div>
-          <div class="challenge-score" aria-label="Challenge score">
-            <span>Correct<strong id="challengeCorrect">0</strong></span>
-            <span>Played<strong id="challengePlayed">0</strong></span>
-            <span>Streak<strong id="challengeStreak">0</strong></span>
-          </div>
-        </div>
-        <div class="challenge-body">
-          <div class="challenge-stage">
-            <p class="challenge-kicker" id="challengeProgress">Best discard · 1 of 3</p>
-            <h3 id="challengePrompt" tabindex="-1">Which tile preserves the strongest tenpai?</h3>
-            <p class="challenge-context" id="challengeContext"></p>
-            <div class="hand" id="challengeHand" aria-label="Mahjong hand"></div>
-            <div class="challenge-options" id="challengeOptions"></div>
-          </div>
-          <aside class="challenge-aside">
-            <div class="challenge-feedback" id="challengeFeedback" aria-live="polite">
-              <h3 class="feedback-status">Commit before you calculate</h3>
-              <p>Look for shanten first, then ukeire, value, and safety. The explanation appears after your choice.</p>
-            </div>
-            <button class="primary challenge-next" id="challengeNext" type="button" hidden>Next challenge</button>
-            <details class="challenge-info"><summary>Info &amp; notation</summary><p>m = characters · p = circles · s = bamboo · E = east · R = red dragon. These fixed study examples isolate a stated situation; they are not a full hand solver. Answer explanations link back to the relevant reference.</p><p>Rules reference: <a href="https://mahjong-europe.org/portal/images/docs/Riichi-rules-2025-EN.pdf" target="_blank" rel="noopener">EMA Riichi Rules 2025</a>. Strategy answers depend on their stated assumptions.</p></details>
-          </aside>
-        </div>
       </div>
     </section>
 
@@ -912,9 +955,9 @@ Can declare kan?
       const N = Number(qs("#liveTiles").value);
       const U = Number(qs("#outs").value);
       const D = Number(qs("#draws").value);
-      if (![N, U, D].every(Number.isInteger) || N <= 0 || U < 0 || U > N || D < 0 || D > N) {
+      if (![N, U, D].every(Number.isInteger) || N <= 0 || N > 136 || U < 0 || U > N || D < 0 || D > N) {
         qs("#ukeireResult").textContent = "—";
-        qs("#ukeireNote").textContent = "Use whole tile counts: live tiles must be positive, and outs and draws must be between zero and live tiles.";
+        qs("#ukeireNote").textContent = "Use whole tile counts: live tiles must be from 1 to 136, and outs and draws must be between zero and live tiles.";
         qs("#ukeireBars").innerHTML = "";
         return;
       }
@@ -923,7 +966,7 @@ Can declare kan?
       qs("#ukeireNote").textContent = `${U} live outs among ${N} unknown live tiles over ${D} own draws.`;
       const bars = qs("#ukeireBars");
       bars.innerHTML = "";
-      [1, 2, 4, 8, 12, 16].forEach(d => {
+      [...new Set([1, 2, 4, 8, 12, 16, D].filter(d => d > 0 && d <= N))].sort((a, b) => a - b).forEach(d => {
         const bp = hitProbability(N, U, d);
         const row = document.createElement("div");
         row.className = "bar-row";
@@ -1042,5 +1085,7 @@ Can declare kan?
     document.addEventListener("DOMContentLoaded", init);
   </script>
 <script src="challenges.js"></script>
+<script src="sequence-model.js"></script>
+<script src="sequence-lab.js"></script>
 </body>
 </html>

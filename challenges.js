@@ -249,6 +249,7 @@
       qsa('[data-practice]').forEach(link => link.addEventListener('click', () => {
         const mode = link.id === 'practiceTable' ? {tiles:'discard',start:'discard',honors:'safety',waits:'wait',scoring:'value'}[qs('.tab.active').dataset.tab] : link.dataset.practice;
         selectPractice(mode);
+        qs("#scenarioDrills").open = true;
         qs('#challengePrompt').focus({preventScroll:true});
       }));
       qs("#challengeNext").addEventListener("click", () => {

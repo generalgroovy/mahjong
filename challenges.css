@@ -64,3 +64,56 @@
 .practice-link { display:inline-block; margin:8px 0; font-weight:700; } .challenge-info { margin-top:16px; color:var(--muted); } .challenge-info summary { cursor:pointer; } .tile { min-width:44px; } .challenge-options button:focus-visible { outline:3px solid var(--accent); outline-offset:3px; } #challengePrompt { scroll-margin-top:90px; } @media(max-width:760px){ .challenge-toolbar { flex-wrap:wrap; padding:16px; } .challenge-body { grid-template-columns:1fr; min-height:0; } .challenge-stage,.challenge-aside { padding:16px; } .challenge-aside { border-left:0; border-top:1px solid var(--border); } .challenge-options { grid-template-columns:1fr; } .challenge-feedback { min-height:0; } } @media print { #challenges button,.challenge-modes { display:none; } }
 
 .hero details summary { cursor:pointer; padding:8px 0; font-weight:700; } .hero>.controls-card { align-self:start; }
+
+/* Practice is the first useful action; reference depth stays one link away. */
+.hero { padding-top: 10px; gap: 14px; }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.12; margin-bottom: 12px; }
+.hero-card { padding: 20px; }
+section { scroll-margin-top: 80px; }
+.sequence-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.sequence-heading h3 { margin: 0; font-size: 1.3rem; }
+.sequence-heading span, .sequence-scope, .sequence-hint { color: var(--muted); font-size: .9rem; }
+.sequence-scope { margin: 2px 0 18px; }
+.sequence-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; }
+.sequence-layout > div { min-width: 0; }
+#sequencePrompt { margin: 0; font-size: 1.25rem; scroll-margin-top: 90px; }
+.sequence-hint { margin: 6px 0; }
+.sequence-options { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 5px; margin-bottom: 12px; }
+.sequence-choice { min-height: 48px; min-width: 0; padding: 6px 2px; border-radius: 6px; font-weight: 800; }
+.sequence-choice small { display: block; font-size: .65rem; font-weight: 400; }
+.sequence-choice[aria-pressed="true"], #sequenceNone[aria-pressed="true"] { background: var(--text); color: var(--panel); border-color: var(--text); outline: 2px solid var(--accent); outline-offset: 1px; }
+.sequence-choice.correct { border-bottom: 4px solid var(--good); }
+.sequence-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+.sequence-lab button { min-height: 44px; }
+.sequence-lab button[hidden] { display: none; }
+.sequence-lab button:disabled { cursor: default; opacity: .7; }
+.sequence-lab button:focus-visible, .sequence-lab summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.sequence-feedback { background: var(--panel-2); border-radius: 8px; padding: 16px; }
+.sequence-feedback p { margin: 8px 0; }
+.sequence-explanations { padding-left: 20px; margin: 12px 0 0; }
+.sequence-explanations li { margin: 8px 0; }
+.sequence-settings { border-radius: 8px; padding: 10px 12px; font-size: .9rem; }
+.sequence-settings label { display: block; margin: 12px 0 4px; }
+.sequence-settings .check-label { display: flex; gap: 10px; align-items: center; min-height: 44px; }
+.sequence-settings input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 auto; }
+.sequence-settings p { margin: 6px 0; }
+.custom-shape-row { display: flex; gap: 6px; }
+.custom-shape-row input { flex: 1; }
+#sequenceCustomError { color: var(--danger); }
+#scenarioDrills { padding: 12px; }
+#scenarioDrills > summary { min-height: 36px; }
+#scenarioDrills .challenge-shell { margin: 12px 0 0; }
+.button.primary, button.primary, .tab.active { color: #fff; }
+[data-theme="dark"] .tab.active { color: #032b27; }
+@media(max-width: 900px) {
+  .sequence-layout { grid-template-columns: 1fr; gap: 18px; }
+}
+@media(max-width: 520px) {
+  .sequence-options { grid-template-columns: repeat(5, minmax(44px, 1fr)); gap: 7px; }
+  .sequence-lab .hand { margin: 14px 0 18px; }
+  #scenarioDrills { padding: 8px; }
+  #scenarioDrills .challenge-stage, #scenarioDrills .challenge-aside { padding: 12px; }
+  .challenge-score { gap: 12px; }
+  .sequence-settings { padding: 10px; }
+}
+@media(prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
