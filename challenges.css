@@ -122,3 +122,19 @@ section { scroll-margin-top: 80px; }
   .sequence-settings { padding: 10px; }
 }
 @media(prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Two clear destinations; the reference stays available without filling practice. */
+.nav { overflow: visible; flex-wrap: wrap; }
+.nav a, .nav summary, .reference-links a { min-height: 44px; display: inline-flex; align-items: center; }
+.display-options { position: relative; padding: 0; border: 0; background: none; }
+.display-options > summary { padding: 8px 12px; cursor: pointer; }
+.display-options[open] { display: flex; flex-wrap: wrap; gap: 8px; }
+.display-options button { margin: 4px; }
+.reference-library { margin: 16px 0; padding: 16px 0; border: 0; border-top: 1px solid var(--border); scroll-margin-top: 110px; }
+.reference-library > summary { font-size: 1.3rem; font-weight: 800; padding: 8px 0; cursor: pointer; }
+.reference-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 8px 0; }
+.reference-links a { font-weight: 700; }
+.sequence-selection { color: var(--muted); font-size: .9rem; min-height: 1.5em; margin: 10px 0 0; }
+.sequence-feedback:focus { outline: 3px solid var(--accent); outline-offset: 3px; }
+:where(a, button, summary, input, select):focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 520px) { .nav .brand { flex-basis: 100%; font-size: .85rem; } .nav { gap: 4px; padding: 6px 16px; } }

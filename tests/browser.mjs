@@ -24,6 +24,7 @@ try {
     const page = await context.newPage(), errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/`);
+    assert.equal(await page.locator('#reference').getAttribute('open'), null);
     await page.locator('.hero .practice-link').click();
     assert.equal(await page.locator('#sequenceCheck').isDisabled(), true);
     await page.locator('#sequenceOptions button[data-rank="3"]').focus();
@@ -34,6 +35,9 @@ try {
     await page.getByText('Every tile found', { exact: true }).waitFor();
     assert.match(await page.locator('#sequenceFeedback').innerText(), /Answer: 3m, 6m · 8 unseen copies/);
     assert.equal(await page.locator('#sequenceScore').innerText(), '1 / 1 correct on first try');
+    assert.equal(await page.locator('#sequenceFeedback').evaluate(el => el === document.activeElement), true);
+    assert.equal(await page.locator('#sequenceSelection').innerText(), 'Selected: 3m, 6m.');
+    await page.keyboard.press('Tab');
     assert.equal(await page.locator('#sequenceNext').evaluate(el => el === document.activeElement), true);
     await page.getByText('Change the exercise', { exact: true }).click();
     await page.locator('#sequenceCustom').fill('34567');
@@ -43,6 +47,8 @@ try {
     assert.match(await page.locator('#sequenceFeedback').innerText(), /Answer: 2m, 5m, 8m · 11 unseen copies/);
     assert.match(await page.locator('#sequenceFeedback').innerText(), /234m \+ 567m/);
     await page.locator('#sequenceRetry').click();
+    assert.equal(await page.locator('#sequencePrompt').evaluate(el => el === document.activeElement), true);
+    assert.equal(await page.locator('#sequenceSelection').innerText(), 'No tiles selected.');
     for (const rank of [2, 5, 8]) await page.locator(`#sequenceOptions button[data-rank="${rank}"]`).click();
     await page.locator('#sequenceCheck').click();
     assert.equal(await page.locator('#sequenceScore').innerText(), '1 / 2 correct on first try');
@@ -75,7 +81,14 @@ try {
     await page.getByText('Change the exercise', { exact: true }).click();
     await page.locator('#sequenceTitle').scrollIntoViewIfNeeded();
     await page.screenshot({ path: `test-results/sequence-${width}.png`, fullPage: false });
+    await page.getByRole('link', { name: 'Reference', exact: true }).click();
+    assert.equal(await page.locator('#reference').getAttribute('open'), '');
     await page.locator('[data-tab="waits"]').click();
+    assert.equal(await page.locator('[data-tab="waits"]').getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.locator('[data-tab="tiles"]').getAttribute('aria-pressed'), 'false');
+    await page.locator('#tableSearch').fill('no matching tile');
+    await page.locator('#resetSearch').click();
+    assert.equal(await page.locator('#tableSearch').evaluate(el => el === document.activeElement), true);
     await page.locator('#practiceTable').click();
     assert.equal(await page.locator('#scenarioDrills').getAttribute('open'), '');
     assert.match(await page.locator('#challengeProgress').innerText(), /Read the wait/i);
@@ -86,6 +99,14 @@ try {
     assert.equal(await page.locator('#ukeireResult').innerText(), '50.0%');
     const labels = await page.locator('#ukeireBars .bar-row > span:first-child').allTextContents();
     assert.deepEqual(labels, ['1 draws', '2 draws', '4 draws']);
+    await page.goto(`http://127.0.0.1:${server.address().port}/#calculators`);
+    assert.equal(await page.locator('#reference').getAttribute('open'), '');
+    assert.equal(await page.locator('#calculators h2').evaluate(el => el === document.activeElement), true);
+    await page.locator('#reference > summary').click();
+    await page.evaluate(() => dispatchEvent(new Event('beforeprint')));
+    assert.equal(await page.locator('#reference').getAttribute('open'), '');
+    await page.evaluate(() => dispatchEvent(new Event('afterprint')));
+    assert.equal(await page.locator('#reference').getAttribute('open'), null);
     const metrics = await page.evaluate(() => ({width:innerWidth, scroll:document.documentElement.scrollWidth}));
     assert.ok(metrics.scroll <= metrics.width, JSON.stringify(metrics));
     assert.deepEqual(errors, []);

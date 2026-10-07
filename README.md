@@ -4,11 +4,11 @@
 
 ## Find a reference
 
-Use the page navigation to open **Practice**, **Stats**, **Calculators**, **Decision Trees**, **Policy**, **Solver** or **Sources**. Statistics tabs switch between tile classes, starting hands, terminals/honors, wait quality and scoring. Search filters the active table; activate a column-heading button to sort with mouse or keyboard. A filter with no matches shows a recovery message; **Clear** restores the active table. **Print / PDF** opens the browser's print workflow.
+Start in **Practice**. Open **Reference** for statistics, calculators, decision trees, strategy notes, model limits and sources. The reference library starts folded so the exercise stays in view; existing section links open the right material directly. Statistics buttons select tile classes, starting hands, terminals/honors, wait quality or scoring and announce which table is selected. Search filters the active table; activate a column-heading button to sort with mouse or keyboard. **Clear** restores the table and returns focus to search. **View** contains theme and **Print / PDF**; printing includes the reference and then restores its open/closed state.
 
 ## Practice a shape
 
-**Sequence builder** starts with `45m`. Select **every** tile that can complete the shape, then **Check tiles**. The explanation shows each sequence partition and the number of copies still unseen. **Show me** reveals the reasoning; **Try again** lets you revisit a mistake without increasing first-try accuracy. **New shape** generates a different inventory from the current level.
+**Sequence builder** starts with `45m`. Select **every** tile that can complete the shape, then **Check tiles**. A short selection line names your choices. Checking or revealing moves focus to the explanation, followed by **Try again** or **New shape**, so the answer and next step stay together on phones. The explanation shows each sequence partition and the number of copies still unseen. **Show me** reveals the reasoning; **Try again** revisits a mistake without increasing first-try accuracy. **New shape** generates a different inventory from the current level. Both return focus to the question.
 
 Under **Change the exercise**, build one, two or three sequences (2, 5 or 8 tiles), choose a suit, or add visible tiles. The generator has 15, 88 and 306 distinct shapes respectively, with no immediate repeated inventory. Visible counts never exceed the four-copy limit together with held tiles. A completion with no unseen copies must not be selected; choose **None left** when no completion remains. Enter your own ranks, such as `34567`, to study a specific shape; invalid input preserves the current exercise. Custom shapes reset visible counts.
 

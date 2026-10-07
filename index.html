@@ -292,14 +292,11 @@
     <nav class="nav" aria-label="Site navigation">
       <span class="brand">Riichi Study Toolkit</span>
       <a href="#challenges">Practice</a>
-      <a href="#statistics">Stats</a>
-      <a href="#calculators">Calculators</a>
-      <a href="#trees">Decision Trees</a>
-      <a href="#policy">Policy</a>
-      <a href="#solver">Solver</a>
-      <a href="#sources">Sources</a>
-      <button id="themeToggle" type="button">Toggle theme</button>
-      <button id="printBtn" type="button">Print / PDF</button>
+      <a href="#reference">Reference</a>
+      <details class="display-options"><summary>View</summary>
+        <button id="themeToggle" type="button">Toggle theme</button>
+        <button id="printBtn" type="button">Print / PDF</button>
+      </details>
     </nav>
   </div>
 
@@ -343,15 +340,18 @@
             <div class="hand" id="sequenceHand" aria-label="Tiles in the shape"></div>
             <div id="sequenceOptions" class="sequence-options" role="group" aria-label="Select every completing tile"></div>
             <button id="sequenceNone" type="button" aria-pressed="false">None left</button>
+            <p id="sequenceSelection" class="sequence-selection" role="status">No tiles selected.</p>
             <div class="sequence-actions">
               <button id="sequenceCheck" class="primary" type="button" disabled>Check tiles</button>
               <button id="sequenceReveal" type="button">Show me</button>
-              <button id="sequenceNext" class="primary" type="button" hidden>New shape</button>
-              <button id="sequenceRetry" type="button" hidden>Try again</button>
             </div>
           </div>
           <div>
-            <div id="sequenceFeedback" class="sequence-feedback" role="status" aria-live="polite"></div>
+            <div id="sequenceFeedback" class="sequence-feedback" role="status" aria-live="polite" tabindex="-1"></div>
+            <div class="sequence-actions">
+              <button id="sequenceRetry" type="button" hidden>Try again</button>
+              <button id="sequenceNext" class="primary" type="button" hidden>New shape</button>
+            </div>
             <details class="sequence-settings"><summary>Change the exercise</summary>
               <label for="sequenceLevel">Build</label>
               <select id="sequenceLevel"><option value="1">1 sequence · 2 tiles</option><option value="2">2 sequences · 5 tiles</option><option value="3">3 sequences · 8 tiles</option></select>
@@ -411,6 +411,13 @@
       </details>
     </section>
 
+    <details id="reference" class="reference-library">
+      <summary>Reference &amp; calculators</summary>
+      <nav class="reference-links no-print" aria-label="Reference topics">
+        <a href="#statistics">Statistics</a><a href="#calculators">Calculators</a>
+        <a href="#trees">Decision trees</a><a href="#policy">Strategy notes</a>
+        <a href="#solver">Model limits</a><a href="#sources">Sources</a>
+      </nav>
     <section id="statistics">
       <div class="section-head">
         <div>
@@ -419,12 +426,12 @@
         </div>
       </div>
       <div class="card">
-        <div class="tabs" role="tablist" aria-label="Statistics tables">
-          <button class="tab active" data-tab="tiles">Tile classes</button>
-          <button class="tab" data-tab="start">Starting hand</button>
-          <button class="tab" data-tab="honors">Terminals/honors</button>
-          <button class="tab" data-tab="waits">Wait quality</button>
-          <button class="tab" data-tab="scoring">Scoring</button>
+        <div class="tabs" role="group" aria-label="Statistics tables">
+          <button class="tab active" data-tab="tiles" aria-pressed="true" aria-controls="tiles">Tile classes</button>
+          <button class="tab" data-tab="start" aria-pressed="false" aria-controls="start">Starting hand</button>
+          <button class="tab" data-tab="honors" aria-pressed="false" aria-controls="honors">Terminals/honors</button>
+          <button class="tab" data-tab="waits" aria-pressed="false" aria-controls="waits">Wait quality</button>
+          <button class="tab" data-tab="scoring" aria-pressed="false" aria-controls="scoring">Scoring</button>
         </div>
         <div class="table-tools">
           <input id="tableSearch" type="search" placeholder="Filter active table..." aria-label="Filter active table" />
@@ -751,6 +758,7 @@ Can declare kan?
       <p><strong>Deployment:</strong> upload this folder to a GitHub repository, enable GitHub Pages from the repository settings, and serve from the root branch. No build step required.</p>
       <p>Generated as a static educational toolkit. It is not a solved mahjong engine and should not be interpreted as a proof of equilibrium play.</p>
     </footer>
+    </details>
   </main>
 
   <script>
@@ -1039,9 +1047,10 @@ Can declare kan?
     function initTabs() {
       qsa(".tab").forEach(tab => {
         tab.addEventListener("click", () => {
-          qsa(".tab").forEach(t => t.classList.remove("active"));
+          qsa(".tab").forEach(t => { t.classList.remove("active"); t.setAttribute("aria-pressed", "false"); });
           qsa(".tab-panel").forEach(p => p.classList.remove("active"));
           tab.classList.add("active");
+          tab.setAttribute("aria-pressed", "true");
           qs(`#${tab.dataset.tab}`).classList.add("active");
           qs("#tableSearch").value = "";
           filterActiveTable();
@@ -1068,7 +1077,7 @@ Can declare kan?
       initTabs();
       initTheme();
       qs("#tableSearch").addEventListener("input", filterActiveTable);
-      qs("#resetSearch").addEventListener("click", () => { qs("#tableSearch").value = ""; filterActiveTable(); });
+      qs("#resetSearch").addEventListener("click", () => { qs("#tableSearch").value = ""; filterActiveTable(); qs("#tableSearch").focus(); });
       qs("#calcUkeire").addEventListener("click", calcUkeire);
       qs("#calcEv").addEventListener("click", calcEv);
       qs("#calcRiichi").addEventListener("click", calcRiichi);
@@ -1086,5 +1095,6 @@ Can declare kan?
 <script src="challenges.js"></script>
 <script src="sequence-model.js"></script>
 <script src="sequence-lab.js"></script>
+<script src="study-navigation.js"></script>
 </body>
 </html>

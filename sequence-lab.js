@@ -6,6 +6,11 @@
   let attempted = 0, correct = 0;
   const suit = () => $('sequenceSuit').value;
   const tile = rank => `${rank}${suit()}`;
+  function describeSelection(none = false) {
+    $('sequenceSelection').textContent = none ? 'Selected: None left.' : selected.size
+      ? `Selected: ${[...selected].sort((a, b) => a - b).map(tile).join(', ')}.`
+      : 'No tiles selected.';
+  }
   function start(next) {
     current = next; counted = false;
     $('sequenceCustomError').textContent = '';
@@ -35,10 +40,12 @@
         button.setAttribute('aria-pressed', String(selected.has(rank)));
         $('sequenceNone').setAttribute('aria-pressed', 'false');
         $('sequenceCheck').disabled = !selected.size;
+        describeSelection();
       });
       $('sequenceOptions').appendChild(button);
     }
     $('sequenceNone').setAttribute('aria-pressed', 'false'); $('sequenceNone').disabled = false;
+    describeSelection();
     $('sequenceCheck').disabled = true; $('sequenceCheck').hidden = false;
     $('sequenceReveal').hidden = false; $('sequenceRetry').hidden = true;
     $('sequenceNext').hidden = true;
@@ -84,7 +91,7 @@
     $('sequenceNone').disabled = true;
     $('sequenceCheck').hidden = true; $('sequenceReveal').hidden = true;
     $('sequenceRetry').hidden = success; $('sequenceNext').hidden = false;
-    $('sequenceNext').focus({ preventScroll: true });
+    feedback.focus();
   }
   function next() {
     start(model.generate(Number($('sequenceLevel').value), $('sequenceVisible').checked, current?.counts.join('')));
@@ -94,11 +101,12 @@
     selected.clear();
     $('sequenceOptions').querySelectorAll('button').forEach(button => button.setAttribute('aria-pressed', 'false'));
     $('sequenceNone').setAttribute('aria-pressed', 'true'); $('sequenceCheck').disabled = false;
+    describeSelection(true);
   });
   $('sequenceCheck').addEventListener('click', () => finish());
   $('sequenceReveal').addEventListener('click', () => finish(true));
-  $('sequenceRetry').addEventListener('click', () => { render(); $('sequencePrompt').focus({ preventScroll: true }); });
-  $('sequenceNext').addEventListener('click', () => { next(); $('sequencePrompt').focus({ preventScroll: true }); });
+  $('sequenceRetry').addEventListener('click', () => { render(); $('sequencePrompt').focus(); });
+  $('sequenceNext').addEventListener('click', () => { next(); $('sequencePrompt').focus(); });
   ['sequenceLevel', 'sequenceVisible'].forEach(id => $(id).addEventListener('change', next));
   $('sequenceSuit').addEventListener('change', () => { render(); });
   $('sequenceCustomForm').addEventListener('submit', event => {
