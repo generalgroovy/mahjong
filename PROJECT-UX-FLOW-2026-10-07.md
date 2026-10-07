@@ -12,4 +12,6 @@ Owner validation: 17 Node tests passed on Windows, including the exhaustive inde
 
 Final runtime: `6f11a7565196510040c3120d63c9bd1805d80e57`. [Browser CI 37609974214](https://github.com/generalgroovy/mahjong/actions/runs/37609974214) passed all three widths and 17 tests. Owner inspected the preceding runtime's complete 320px correction screenshot and made Keep working the primary action while the solution is hidden; the final browser suite asserts that hierarchy. Final screenshots are retained in the workflow artifact. Independent reviewer `flow_a` passed the complete runtime and the final action-hierarchy delta without blockers; its report is in the shared `ux-flow-2026-10-07/reviews/mahjong-review.md` record.
 
-Root rendered acceptance remains a separate gate. No local browser automation was run by the owner. Automated checks do not establish human learning outcomes or independently validate historical strategy claims.
+Root CUA rendered acceptance passed at 390×844: chose incorrect 1m and correct 3m on 4m5m, confirmed the feedback withheld 6m and preserved choices, then corrected 1m to 6m through Keep working. The success explicitly retained the original first-try score. The root screenshot `evidence/mahjong-learning-phone.png` records the clear phone flow. Root authorized main promotion after this gate and the final source/CI gates closed.
+
+No local browser automation was run by the owner. Automated checks do not establish human learning outcomes or independently validate historical strategy claims.
