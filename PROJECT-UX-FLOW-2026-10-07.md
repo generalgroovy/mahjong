@@ -1,6 +1,6 @@
 # Mahjong correction flow — 7 October 2026
 
-Baseline: `276d27f2e8fbc2f65c93d1ac737cfb91b8c6745f`, the clean prior accepted checkout and current upstream main at inspection. Candidate branch: `codex/ux-flow-2026-10-07`. Intended public URL: https://generalgroovy.github.io/mahjong/. This candidate is not publication.
+Baseline: `276d27f2e8fbc2f65c93d1ac737cfb91b8c6745f`, the clean prior accepted checkout and upstream main at inspection. Branch: `codex/ux-flow-2026-10-07`. Published URL: https://generalgroovy.github.io/mahjong/.
 
 Observed friction: checking an incomplete answer immediately exposed every correct completion and its partition. The subsequent retry reset all choices, so the learner could only recall an already exposed answer. The new correction flow keeps missing answers hidden and preserves the learner's partial work.
 
@@ -15,3 +15,5 @@ Final runtime: `6f11a7565196510040c3120d63c9bd1805d80e57`. [Browser CI 376099742
 Root CUA rendered acceptance passed at 390×844: chose incorrect 1m and correct 3m on 4m5m, confirmed the feedback withheld 6m and preserved choices, then corrected 1m to 6m through Keep working. The success explicitly retained the original first-try score. The root screenshot `evidence/mahjong-learning-phone.png` records the clear phone flow. Root authorized main promotion after this gate and the final source/CI gates closed.
 
 No local browser automation was run by the owner. Automated checks do not establish human learning outcomes or independently validate historical strategy claims.
+
+Release: after root authorization, main fast-forwarded to `68cd0d973ab4dd346366988828f3f3ca9e5b160a`; [Pages deployment 37610561312](https://github.com/generalgroovy/mahjong/actions/runs/37610561312) passed. All six public runtime files matched the accepted Git bytes exactly (index, practice style/drills, finite model, sequence interaction and study navigation). Hash evidence is in the shared `ux-flow-2026-10-07/evidence/mahjong-public.json`. Later report-only commits do not alter those runtime files.
