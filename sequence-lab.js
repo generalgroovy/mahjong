@@ -83,6 +83,8 @@
     $('sequenceNone').disabled = true;
     $('sequenceCheck').hidden = true; $('sequenceReveal').hidden = solutionShown;
     $('sequenceRetry').textContent = solutionShown ? 'Try again' : 'Keep working';
+    $('sequenceRetry').classList.toggle('primary', !solutionShown);
+    $('sequenceNext').classList.toggle('primary', solutionShown);
     $('sequenceRetry').hidden = success; $('sequenceNext').hidden = false;
     feedback.focus();
   }
@@ -110,7 +112,7 @@
     }
     const hint = document.createElement('p');
     hint.textContent = available.length
-      ? 'Keep working keeps your choices so you can adjust them. The missing tiles stay hidden until you solve it or choose Show me.'
+      ? 'Your choices are kept for the next try. Find the missing tiles, or choose Show me for the full answer.'
       : 'No completing tile has an unseen copy. Keep working, then choose None left.';
     feedback.appendChild(hint);
   }

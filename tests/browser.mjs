@@ -47,9 +47,10 @@ try {
     assert.match(await page.locator('#sequenceFeedback').innerText(), /2 of 3 completing tile types found\. 1 more to find/);
     assert.doesNotMatch(await page.locator('#sequenceFeedback').innerText(), /8m|Answer:|234m/);
     assert.equal(await page.locator('#sequenceOptions .correct').count(), 0);
+    assert.equal(await page.locator('#sequenceRetry').evaluate(el => el.classList.contains('primary')), true);
     await page.keyboard.press('Tab');
     assert.equal(await page.locator('#sequenceRetry').evaluate(el => el === document.activeElement), true);
-    await page.locator('#sequenceFeedback').scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: `test-results/correction-${width}.png`, fullPage: true });
     await page.locator('#sequenceRetry').click();
     assert.equal(await page.locator('#sequencePrompt').evaluate(el => el === document.activeElement), true);
