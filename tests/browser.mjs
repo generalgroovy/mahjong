@@ -25,7 +25,7 @@ try {
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/`);
     assert.equal(await page.locator('#reference').getAttribute('open'), null);
-    await page.locator('.hero .practice-link').click();
+    await page.getByRole('link', { name: 'Practice', exact: true }).click();
     assert.equal(await page.locator('#sequenceCheck').isDisabled(), true);
     await page.locator('#sequenceOptions button[data-rank="3"]').focus();
     await page.keyboard.press('Space');
