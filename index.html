@@ -18,7 +18,7 @@
       --danger: #b91c1c;
       --warn: #b45309;
       --good: #047857;
-      --shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+      --shadow: none;
       --radius: 8px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -36,7 +36,7 @@
       --danger: #f87171;
       --warn: #fbbf24;
       --good: #34d399;
-      --shadow: 0 18px 40px rgba(0, 0, 0, 0.40);
+      --shadow: none;
     }
 
     * { box-sizing: border-box; }
@@ -45,10 +45,7 @@
       margin: 0;
       font-family: var(--sans);
       color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(20,184,166,0.18), transparent 32rem),
-        radial-gradient(circle at top right, rgba(59,130,246,0.14), transparent 28rem),
-        var(--bg);
+      background: var(--bg);
       line-height: 1.55;
     }
 
@@ -64,14 +61,14 @@
       padding: 34px 0 18px;
     }
     .hero-card, .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.72));
+      background: var(--panel);
       background-color: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
     [data-theme="dark"] .hero-card, [data-theme="dark"] .card {
-      background: linear-gradient(180deg, rgba(15,23,42,0.92), rgba(15,23,42,0.76));
+      background: var(--panel);
     }
     .hero-card { padding: 32px; min-width: 0; }
     .hero h1 { font-size: clamp(2.25rem, 5.4vw, 5rem); line-height: 0.98; margin: 0 0 18px; letter-spacing: 0; }
@@ -304,8 +301,8 @@
     <header class="hero">
       <div class="hero-card">
         <h1>Riichi Mahjong Study Toolkit</h1>
-        <p>Practice decisions. Explore tiles, waits, and scoring.</p><a class="practice-link" href="#challenges">Start practice →</a>
-        <details><summary>Info</summary><p><strong>Scope:</strong> Japanese riichi mahjong, WRC-style assumptions. Exact GTO mahjong is not solved; this site offers simplified study models for shanten, ukeire, EV, opponent threat estimation, and rank utility.</p>
+
+        <details><summary>Scope &amp; assumptions</summary><p><strong>Scope:</strong> Japanese riichi mahjong, WRC-style assumptions. Exact GTO mahjong is not solved; this site offers simplified study models for shanten, ukeire, EV, opponent threat estimation, and rank utility.</p>
         <div class="badge-row" aria-label="Key assumptions">
           <span class="badge">136 tiles</span>
           <span class="badge">34 tile types</span>
@@ -327,7 +324,7 @@
       <div class="section-head">
         <div>
           <h2>Practice</h2>
-          <p>Start with a shape. Find its missing tiles.</p>
+
         </div>
       </div>
       <article class="card sequence-lab" aria-labelledby="sequenceTitle">
@@ -706,7 +703,7 @@ Can declare kan?
       <div class="section-head">
         <div>
           <h2>Solver architecture</h2>
-          <p>A static site cannot run full self-play RL, but this architecture shows how to extend the model into a real engine.</p>
+          <p>A conceptual action scorer. The toolkit does not implement these solver components.</p>
         </div>
       </div>
       <div class="grid two">
@@ -755,8 +752,8 @@ Can declare kan?
     </section>
 
     <footer class="footer">
-      <p><strong>Deployment:</strong> upload this folder to a GitHub repository, enable GitHub Pages from the repository settings, and serve from the root branch. No build step required.</p>
-      <p>Generated as a static educational toolkit. It is not a solved mahjong engine and should not be interpreted as a proof of equilibrium play.</p>
+
+      <p>These study models do not establish optimal or equilibrium play.</p>
     </footer>
     </details>
   </main>

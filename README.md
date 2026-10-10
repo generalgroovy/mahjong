@@ -1,6 +1,6 @@
 # Riichi Mahjong Study Toolkit
 
-[Open the toolkit](https://generalgroovy.github.io/mahjong/). A static study reference with searchable tables, probability and expected-value calculators, decision trees and strategy notes. The simplified models are learning aids; this is not a solved-game policy or full Mahjong solver.
+[Open the toolkit](https://generalgroovy.github.io/mahjong/). Practice partial tile shapes and decisions; reference searchable tables, probability and expected-value calculators, and strategy notes. The simplified models are learning aids; this is not a solved-game policy or full Mahjong solver.
 
 ## Find a reference
 
